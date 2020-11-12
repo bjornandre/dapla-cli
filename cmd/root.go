@@ -10,7 +10,21 @@ var rootCmd = &cobra.Command{
 	Long: `The dapla command is a collection of utilities you can use with the dapla
 				platform.`,
 }
+var (
+	serverUrl   string
+	bearerToken string
+	jupyter     bool
+)
 
 func Execute() error {
 	return rootCmd.Execute()
+}
+
+func init() {
+	rootCmd.PersistentFlags().StringVarP(&serverUrl, "server", "s", "",
+		"The URI of the API server")
+	rootCmd.PersistentFlags().StringVar(&bearerToken, "token", "",
+		"Bearer token to use to authenticate with the server")
+	rootCmd.PersistentFlags().BoolVar(&jupyter, "--jupyter", false,
+		"Fetch the Bearer token from jupyter")
 }
