@@ -22,9 +22,9 @@ func Execute() error {
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&serverUrl, "server", "s", "",
-		"The URI of the API server")
+		"set URI of the API server")
 	rootCmd.PersistentFlags().StringVar(&bearerToken, "token", "",
-		"Bearer token to use to authenticate with the server")
+		"set the Bearer token to use to authenticate with the server")
 	rootCmd.PersistentFlags().BoolVar(&jupyter, "--jupyter", false,
-		"Fetch the Bearer token from jupyter")
+		"fetch the Bearer token from jupyter")
 }
