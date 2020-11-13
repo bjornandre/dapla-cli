@@ -3,7 +3,10 @@ package rest
 import (
 	"encoding/json"
 	"fmt"
+	errors2 "github.com/pkg/errors"
 	"net/http"
+	"net/url"
+	"os"
 	"time"
 )
 
@@ -14,6 +17,9 @@ type Client struct {
 }
 
 type DatasetResponse []DatasetElement
+
+const jupyterHUBTokenURL = "JUPYTERHUB_HANDLER_CUSTOM_AUTH_URL"
+const jupyterAPIToken = "JUPYTERHUB_API_TOKEN"
 
 type DatasetElement struct {
 	Name      string    `json:"name"`
@@ -29,15 +35,54 @@ func NewClient(baseURL string, authBearer string) *Client {
 	}
 }
 
-func NewClientWithJupyter(baseURL string) *Client {
-	// TODO: Get jupyter URL from env.
-	// 	     Get token from env
-	// 		 Fetch token.
+func NewClientWithJupyter(baseURL string) (*Client, error) {
+
+	apiToken := os.Getenv(jupyterHUBTokenURL)
+	tokenURL := os.Getenv(jupyterAPIToken)
+	if tokenURL == "" || apiToken == "" {
+		return nil, errors2.Errorf("missing environment %s or %s", jupyterHUBTokenURL, jupyterAPIToken)
+	}
+
+	token, err := fetchJupyterToken(apiToken, tokenURL)
+	if err != nil {
+		return nil, err
+	}
 	return &Client{
 		BaseURL:    baseURL,
 		Client:     http.DefaultClient,
-		authBearer: "TODO",
+		authBearer: token,
+	}, nil
+}
+
+// Fetch the JTW token from jupyter environment
+func fetchJupyterToken(apiToken, tokenURL string) (string, error) {
+	parsedURL, err := url.Parse(tokenURL)
+	if err != nil {
+		return "", err
 	}
+
+	client := http.DefaultClient
+	req, err := http.NewRequest(http.MethodGet, parsedURL.String(), nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", apiToken))
+	res, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
+		return "", fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+	}
+
+	var data map[string]interface{}
+	err = json.NewDecoder(res.Body).Decode(&data)
+	if err != nil {
+		return "", nil
+	}
+
+	return data["access_token"].(string), nil
 }
 
 func (c Client) DeleteDatasets(path string) error {

@@ -2,28 +2,33 @@ package rest
 
 import (
 	"github.com/h2non/gock"
-	"github.com/steinfletcher/apitest"
 	"net/http"
 	"testing"
 )
 
-var listDataset = apitest.NewMock().
-	Get("/api/v1/list/foo/bar").
-	RespondWith().
-	Body(`
-[{
-	"createdBy": "Arild Johan Takvam-Borge",
-	"createdDate": "2020-11-12T20:52:00.528414Z",
-    "name": "skatt.tmp"
-},{
-    "createdBy": "Hadrien Kohl",
-    "createdDate": "2020-11-12T20:35:20.528414Z",
-    "name": "teststuff"
-}]`).
-	Status(http.StatusOK).
-	End()
+func TestClient_fetchJupyterToken(t *testing.T) {
+	defer gock.Off()
 
-func TestClient_DeleteDatasets(t *testing.T) {
+	gock.New("http://server.com").
+		Get("/foo/bar/token").
+		MatchHeader("Authorization", "^token the api token$").
+		Reply(http.StatusOK).
+		BodyString(`{ "access_token": "the access token"}`)
+
+	gock.New("http://server.com").
+		Reply(http.StatusForbidden)
+
+	token, err := fetchJupyterToken("the api token", "http://server.com/foo/bar/token")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if token != "the access token" {
+		t.Errorf("expected %s but got %s", "the access token", token)
+	}
+}
+
+func TestClient_ListDatasets(t *testing.T) {
 	defer gock.Off()
 
 	gock.New("http://server.com").

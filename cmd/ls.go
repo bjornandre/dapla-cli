@@ -25,7 +25,11 @@ var lsCommand = &cobra.Command{
 
 		var client *rest.Client
 		if jupyter {
-			client = rest.NewClientWithJupyter(serverUrl)
+			var err error
+			client, err = rest.NewClientWithJupyter(serverUrl)
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		if bearerToken != "" {
