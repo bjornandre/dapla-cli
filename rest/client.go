@@ -86,7 +86,7 @@ func fetchJupyterToken(apiToken, tokenURL string) (string, error) {
 }
 
 func (c Client) DeleteDatasets(path string) error {
-	panic("TODO")
+	panic(fmt.Sprintf("TODO %s", path))
 }
 
 func (c *Client) ListDatasets(path string) (*DatasetResponse, error) {
