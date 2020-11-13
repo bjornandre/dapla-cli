@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dapla-data-cli/cmd"
+	"dapla-cli/cmd"
 	"fmt"
 	"os"
 )

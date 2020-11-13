@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"dapla-data-cli/rest"
+	"dapla-cli/rest"
 	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
