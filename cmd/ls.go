@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"dapla-cli/rest"
 	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/statisticsnorway/dapla-cli/rest"
 	"strings"
 )
 
