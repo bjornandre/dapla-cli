@@ -25,6 +25,6 @@ func init() {
 		"set URI of the API server")
 	rootCmd.PersistentFlags().StringVar(&bearerToken, "token", "",
 		"set the Bearer token to use to authenticate with the server")
-	rootCmd.PersistentFlags().BoolVar(&jupyter, "--jupyter", false,
+	rootCmd.PersistentFlags().BoolVar(&jupyter, "jupyter", false,
 		"fetch the Bearer token from jupyter")
 }
