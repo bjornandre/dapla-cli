@@ -24,18 +24,16 @@ var lsCommand = &cobra.Command{
 		}
 
 		var client *rest.Client
-		if jupyter {
+		switch {
+		case jupyter:
 			var err error
 			client, err = rest.NewClientWithJupyter(serverUrl)
 			if err != nil {
 				panic(err)
 			}
-		}
-
-		if bearerToken != "" {
+		case bearerToken != "":
 			client = rest.NewClient(serverUrl, bearerToken)
-		}
-		if client == nil {
+		default:
 			panic(errors.New("use --jupyter or define the --token"))
 		}
 
