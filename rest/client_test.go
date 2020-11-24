@@ -18,7 +18,7 @@ func TestClient_fetchJupyterToken(t *testing.T) {
 	gock.New("http://server.com").
 		Reply(http.StatusForbidden)
 
-	token, err := fetchJupyterToken("the api token", "http://server.com/foo/bar/token")
+	token, err := fetchJupyterToken("http://server.com/foo/bar/token", "the api token")
 	if err != nil {
 		t.Fatal(err)
 	}

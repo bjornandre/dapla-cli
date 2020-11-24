@@ -37,13 +37,13 @@ func NewClient(baseURL string, authBearer string) *Client {
 
 func NewClientWithJupyter(baseURL string) (*Client, error) {
 
-	apiToken := os.Getenv(jupyterHUBTokenURL)
-	tokenURL := os.Getenv(jupyterAPIToken)
-	if tokenURL == "" || apiToken == "" {
+	apiURL := os.Getenv(jupyterHUBTokenURL)
+	apiToken := os.Getenv(jupyterAPIToken)
+	if apiToken == "" || apiURL == "" {
 		return nil, errors2.Errorf("missing environment %s or %s", jupyterHUBTokenURL, jupyterAPIToken)
 	}
 
-	token, err := fetchJupyterToken(apiToken, tokenURL)
+	token, err := fetchJupyterToken(apiURL, apiToken)
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +55,8 @@ func NewClientWithJupyter(baseURL string) (*Client, error) {
 }
 
 // Fetch the JTW token from jupyter environment
-func fetchJupyterToken(apiToken, tokenURL string) (string, error) {
-	parsedURL, err := url.Parse(tokenURL)
+func fetchJupyterToken(apiURL, apiToken string) (string, error) {
+	parsedURL, err := url.Parse(apiURL)
 	if err != nil {
 		return "", err
 	}
