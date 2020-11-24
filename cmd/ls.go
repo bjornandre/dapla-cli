@@ -1,11 +1,15 @@
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/statisticsnorway/dapla-cli/rest"
-	"strings"
+	"io"
+	"os"
+	"text/tabwriter"
+	"time"
 )
 
 func init() {
@@ -37,14 +41,39 @@ var lsCommand = &cobra.Command{
 			panic(errors.New("use --jupyter or define the --token"))
 		}
 
+		// Use newline when not in terminal (piped)
+		var printFunction func(datasets *rest.DatasetResponse, output io.Writer)
+		if fileInfo, _ := os.Stdout.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
+			printFunction = printTabular
+		} else {
+			printFunction = printNewLine
+		}
+
 		for _, path := range args {
 			res, err := client.ListDatasets(path)
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println(res)
+			printFunction(res, os.Stdout)
 		}
-
-		fmt.Println("LIST! " + strings.Join(args, " "))
 	},
+}
+
+// Prints the dataset names
+func printNewLine(datasets *rest.DatasetResponse, output io.Writer) {
+	writer := bufio.NewWriter(output)
+	defer writer.Flush()
+	for _, dataset := range *datasets {
+		fmt.Fprintln(writer, dataset.Name)
+	}
+}
+
+// Prints the datasets in tabular format.
+func printTabular(datasets *rest.DatasetResponse, output io.Writer) {
+	writer := tabwriter.NewWriter(output, 32, 0, 2, ' ', tabwriter.TabIndent)
+	defer writer.Flush()
+	fmt.Fprintln(writer, "Name\tAuthor\tCreated")
+	for _, dataset := range *datasets {
+		fmt.Fprintf(writer, "%s\t%s\t%s\n", dataset.Name, dataset.CreatedBy, dataset.CreatedAt.Format(time.RFC3339))
+	}
 }
