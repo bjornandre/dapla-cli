@@ -22,9 +22,12 @@ const jupyterHUBTokenURL = "JUPYTERHUB_HANDLER_CUSTOM_AUTH_URL"
 const jupyterAPIToken = "JUPYTERHUB_API_TOKEN"
 
 type DatasetElement struct {
-	Name      string    `json:"name"`
+	Path      string    `json:"path"`
 	CreatedBy string    `json:"createdBy"`
 	CreatedAt time.Time `json:"createdDate"`
+	Type      string    `json:"type"`
+	Valuation string    `json:"valuation"`
+	State     string    `json:"state"`
 }
 
 func NewClient(baseURL string, authBearer string) *Client {

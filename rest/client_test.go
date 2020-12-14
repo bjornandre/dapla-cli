@@ -1,9 +1,11 @@
 package rest
 
 import (
+	"github.com/google/go-cmp/cmp"
 	"github.com/h2non/gock"
 	"net/http"
 	"testing"
+	"time"
 )
 
 func TestClient_fetchJupyterToken(t *testing.T) {
@@ -38,11 +40,17 @@ func TestClient_ListDatasets(t *testing.T) {
 [{
 	"createdBy": "Ola Nordmann",
 	"createdDate": "2000-01-01T00:00:00.123456Z",
-    "name": "foo/file1"
+    "path": "foo/file1",
+	"type": "BOUNDED",
+	"valuation": "INTERNAL",
+	"state": "INPUT"
 },{
     "createdBy": "Kari Nordmann",
     "createdDate": "3000-01-01T00:00:00.123456Z",
-    "name": "foo/file2"
+    "path": "foo/file2",
+	"type": "UNBOUNDED",
+	"valuation": "SENSITIVE",
+	"state": "RAW"
 }]
 `)
 
@@ -51,10 +59,25 @@ func TestClient_ListDatasets(t *testing.T) {
 
 	var client = NewClient("http://server.com", "a secret secret")
 
+	var expected = DatasetElement{
+		CreatedAt: time.Date(2000, 1, 1, 0, 0, 0, 123456000, time.UTC),
+		CreatedBy: "Ola Nordmann",
+		Path:      "foo/file1",
+		Type:      "BOUNDED",
+		Valuation: "INTERNAL",
+		State:     "INPUT",
+	}
+
 	datasets, err := client.ListDatasets("foo")
 	if err != nil {
-		t.Errorf("Error %v", err)
-	} else if len(*datasets) != 2 {
+		t.Errorf("Got error %v", err)
+	}
+
+	if len(*datasets) != 2 {
 		t.Errorf("Invalid response")
+	}
+	var element = (*datasets)[0]
+	if !cmp.Equal(expected, element) {
+		t.Errorf("Expected %v, but got %v", expected, element)
 	}
 }
