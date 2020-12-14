@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"github.com/google/go-cmp/cmp"
 	"github.com/h2non/gock"
 	"net/http"
 	"testing"
@@ -47,7 +48,7 @@ func TestClient_ListDatasets(t *testing.T) {
     "createdBy": "Kari Nordmann",
     "createdDate": "3000-01-01T00:00:00.123456Z",
     "path": "foo/file2",
-	"type": "unBOUNDED",
+	"type": "UNBOUNDED",
 	"valuation": "SENSITIVE",
 	"state": "RAW"
 }]
@@ -58,39 +59,25 @@ func TestClient_ListDatasets(t *testing.T) {
 
 	var client = NewClient("http://server.com", "a secret secret")
 
-	datasets, err := client.ListDatasets("foo")
-	// TODO use these in the reply above
-	expectedCreatedBy := "Ola Nordmann"
-	expectedCreatedAt := "2000-01-01T00:00:00.123456Z"
-	expectedPath := "foo/file1"
-	expectedType := "BOUNDED"
-	expectedValuation := "INTERNAL"
-	expectedState := "INPUT"
-	var v = *datasets
-	if v[0].CreatedBy != expectedCreatedBy {
-		t.Errorf("Expected %v, but got %v", expectedCreatedBy, v[0].CreatedBy)
+	var expected = DatasetElement{
+		CreatedAt: time.Date(2000, 1, 1, 0, 0, 0, 123456000, time.UTC),
+		CreatedBy: "Ola Nordmann",
+		Path:      "foo/file1",
+		Type:      "BOUNDED",
+		Valuation: "INTERNAL",
+		State:     "INPUT",
 	}
 
-	//TODO how to compare these correctly?
-	parsedExpectedCreatedAt, _ := time.Parse(expectedCreatedAt, expectedCreatedAt)
-	if v[0].CreatedAt != parsedExpectedCreatedAt {
-		t.Errorf("Expected %v, but got %v", expectedCreatedAt, v[0].CreatedAt)
-	}
-	if v[0].Path != expectedPath {
-		t.Errorf("Expected %v, but got %v", expectedPath, v[0].Path)
-	}
-	if v[0].Type != expectedType {
-		t.Errorf("Expected %v, but got %v", expectedType, v[0].Type)
-	}
-	if v[0].Valuation != expectedValuation {
-		t.Errorf("Expected %v, but got %v", expectedValuation, v[0].Valuation)
-	}
-	if v[0].State != expectedState {
-		t.Errorf("Expected %v, but got %v", expectedState, v[0].State)
-	}
+	datasets, err := client.ListDatasets("foo")
 	if err != nil {
-		t.Errorf("Error %v", err)
-	} else if len(*datasets) != 2 {
+		t.Errorf("Got error %v", err)
+	}
+
+	if len(*datasets) != 2 {
 		t.Errorf("Invalid response")
+	}
+	var element = (*datasets)[0]
+	if !cmp.Equal(expected, element) {
+		t.Errorf("Expected %v, but got %v", expected, element)
 	}
 }
