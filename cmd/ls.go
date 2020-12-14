@@ -64,7 +64,7 @@ func printNewLine(datasets *rest.DatasetResponse, output io.Writer) {
 	writer := bufio.NewWriter(output)
 	defer writer.Flush()
 	for _, dataset := range *datasets {
-		fmt.Fprintln(writer, dataset.Name)
+		fmt.Fprintln(writer, dataset.Path)
 	}
 }
 
@@ -72,8 +72,14 @@ func printNewLine(datasets *rest.DatasetResponse, output io.Writer) {
 func printTabular(datasets *rest.DatasetResponse, output io.Writer) {
 	writer := tabwriter.NewWriter(output, 32, 0, 2, ' ', tabwriter.TabIndent)
 	defer writer.Flush()
-	fmt.Fprintln(writer, "Name\tAuthor\tCreated")
+	fmt.Fprintln(writer, "Name\tAuthor\tCreated\tType\tValuation\tState")
 	for _, dataset := range *datasets {
-		fmt.Fprintf(writer, "%s\t%s\t%s\n", dataset.Name, dataset.CreatedBy, dataset.CreatedAt.Format(time.RFC3339))
+		fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
+			dataset.Path,
+			dataset.CreatedBy,
+			dataset.CreatedAt.Format(time.RFC3339),
+			dataset.Type,
+			dataset.Valuation,
+			dataset.State)
 	}
 }
