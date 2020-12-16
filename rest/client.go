@@ -28,6 +28,7 @@ type DatasetElement struct {
 	Type      string    `json:"type"`
 	Valuation string    `json:"valuation"`
 	State     string    `json:"state"`
+	Depth     int       `json:"depth"`
 }
 
 func NewClient(baseURL string, authBearer string) *Client {

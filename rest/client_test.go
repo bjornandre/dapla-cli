@@ -43,14 +43,24 @@ func TestClient_ListDatasets(t *testing.T) {
     "path": "foo/file1",
 	"type": "BOUNDED",
 	"valuation": "INTERNAL",
-	"state": "INPUT"
+	"state": "INPUT",
+	"depth": 1
 },{
     "createdBy": "Kari Nordmann",
     "createdDate": "3000-01-01T00:00:00.123456Z",
-    "path": "foo/file2",
+    "path": "foo/bar/file2",
 	"type": "UNBOUNDED",
 	"valuation": "SENSITIVE",
-	"state": "RAW"
+	"state": "RAW",
+	"depth": 1
+},{
+    "createdBy": "Kari Nordmann",
+    "createdDate": "3000-01-01T00:00:00.123456Z",
+    "path": "foo/bar",
+	"type": "",
+	"valuation": "",
+	"state": "",
+	"depth": 2
 }]
 `)
 
@@ -59,13 +69,24 @@ func TestClient_ListDatasets(t *testing.T) {
 
 	var client = NewClient("http://server.com", "a secret secret")
 
-	var expected = DatasetElement{
+	var expectedDataset = DatasetElement{
 		CreatedAt: time.Date(2000, 1, 1, 0, 0, 0, 123456000, time.UTC),
 		CreatedBy: "Ola Nordmann",
 		Path:      "foo/file1",
 		Type:      "BOUNDED",
 		Valuation: "INTERNAL",
 		State:     "INPUT",
+		Depth:     1,
+	}
+
+	var expectedFolder = DatasetElement{
+		CreatedAt: time.Date(3000, 1, 1, 0, 0, 0, 123456000, time.UTC),
+		CreatedBy: "Kari Nordmann",
+		Path:      "foo/bar",
+		Type:      "",
+		Valuation: "",
+		State:     "",
+		Depth:     2,
 	}
 
 	datasets, err := client.ListDatasets("foo")
@@ -73,11 +94,16 @@ func TestClient_ListDatasets(t *testing.T) {
 		t.Errorf("Got error %v", err)
 	}
 
-	if len(*datasets) != 2 {
+	if len(*datasets) != 3 {
 		t.Errorf("Invalid response")
 	}
-	var element = (*datasets)[0]
-	if !cmp.Equal(expected, element) {
-		t.Errorf("Expected %v, but got %v", expected, element)
+	var datasetElement = (*datasets)[0]
+	if !cmp.Equal(expectedDataset, datasetElement) {
+		t.Errorf("Expected %v, but got %v", expectedDataset, datasetElement)
+	}
+
+	var folderElement = (*datasets)[2]
+	if !cmp.Equal(expectedFolder, folderElement) {
+		t.Errorf("Expected %v, but got %v", expectedFolder, folderElement)
 	}
 }

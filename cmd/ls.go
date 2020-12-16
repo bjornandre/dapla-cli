@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/juju/ansiterm"
 	"github.com/spf13/cobra"
 	"github.com/statisticsnorway/dapla-cli/rest"
 	"io"
 	"os"
-	"text/tabwriter"
 	"time"
 )
 
@@ -68,18 +68,33 @@ func printNewLine(datasets *rest.DatasetResponse, output io.Writer) {
 	}
 }
 
-// Prints the datasets in tabular format.
+// Prints the datasets in tabular format. Datasets are white and folders blue and with a trailing '/'
 func printTabular(datasets *rest.DatasetResponse, output io.Writer) {
-	writer := tabwriter.NewWriter(output, 32, 0, 2, ' ', tabwriter.TabIndent)
+	writer := ansiterm.NewTabWriter(output, 32, 0, 2, ' ', 0)
+	headerContext := ansiterm.Foreground(ansiterm.BrightCyan)
+	headerContext.SetStyle(ansiterm.Bold)
+	datasetContext := ansiterm.Foreground(ansiterm.White)
+	folderContext := ansiterm.Foreground(ansiterm.Blue)
+	folderContext.SetStyle(ansiterm.Italic)
 	defer writer.Flush()
-	fmt.Fprintln(writer, "Name\tAuthor\tCreated\tType\tValuation\tState")
+	headerContext.Fprint(writer, "Name\tAuthor\tCreated\tType\tValuation\tState\n")
 	for _, dataset := range *datasets {
-		fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
-			dataset.Path,
-			dataset.CreatedBy,
-			dataset.CreatedAt.Format(time.RFC3339),
-			dataset.Type,
-			dataset.Valuation,
-			dataset.State)
+		if dataset.Depth == 1 {
+			datasetContext.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
+				dataset.Path,
+				dataset.CreatedBy,
+				dataset.CreatedAt.Format(time.RFC3339),
+				dataset.Type,
+				dataset.Valuation,
+				dataset.State)
+		} else {
+			folderContext.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
+				dataset.Path+"/",
+				dataset.CreatedBy,
+				dataset.CreatedAt.Format(time.RFC3339),
+				dataset.Type,
+				dataset.Valuation,
+				dataset.State)
+		}
 	}
 }
