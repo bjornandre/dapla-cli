@@ -79,17 +79,17 @@ func printTabular(datasets *rest.DatasetResponse, output io.Writer) {
 	defer writer.Flush()
 	headerContext.Fprint(writer, "Name\tAuthor\tCreated\tType\tValuation\tState\n")
 	for _, dataset := range *datasets {
-		if dataset.Depth == 1 {
-			datasetContext.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
-				dataset.Path,
+		if dataset.ChildrenCount > 1 { // is folder
+			folderContext.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
+				dataset.Path+"/",
 				dataset.CreatedBy,
 				dataset.CreatedAt.Format(time.RFC3339),
 				dataset.Type,
 				dataset.Valuation,
 				dataset.State)
 		} else {
-			folderContext.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
-				dataset.Path+"/",
+			datasetContext.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
+				dataset.Path,
 				dataset.CreatedBy,
 				dataset.CreatedAt.Format(time.RFC3339),
 				dataset.Type,

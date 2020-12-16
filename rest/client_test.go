@@ -44,7 +44,7 @@ func TestClient_ListDatasets(t *testing.T) {
 	"type": "BOUNDED",
 	"valuation": "INTERNAL",
 	"state": "INPUT",
-	"depth": 1
+	"childrenCount": 1
 },{
     "createdBy": "Kari Nordmann",
     "createdDate": "3000-01-01T00:00:00.123456Z",
@@ -52,7 +52,7 @@ func TestClient_ListDatasets(t *testing.T) {
 	"type": "UNBOUNDED",
 	"valuation": "SENSITIVE",
 	"state": "RAW",
-	"depth": 1
+	"childrenCount": 1
 },{
     "createdBy": "Kari Nordmann",
     "createdDate": "3000-01-01T00:00:00.123456Z",
@@ -60,7 +60,7 @@ func TestClient_ListDatasets(t *testing.T) {
 	"type": "",
 	"valuation": "",
 	"state": "",
-	"depth": 2
+	"childrenCount": 2
 }]
 `)
 
@@ -70,23 +70,23 @@ func TestClient_ListDatasets(t *testing.T) {
 	var client = NewClient("http://server.com", "a secret secret")
 
 	var expectedDataset = DatasetElement{
-		CreatedAt: time.Date(2000, 1, 1, 0, 0, 0, 123456000, time.UTC),
-		CreatedBy: "Ola Nordmann",
-		Path:      "foo/file1",
-		Type:      "BOUNDED",
-		Valuation: "INTERNAL",
-		State:     "INPUT",
-		Depth:     1,
+		CreatedAt:     time.Date(2000, 1, 1, 0, 0, 0, 123456000, time.UTC),
+		CreatedBy:     "Ola Nordmann",
+		Path:          "foo/file1",
+		Type:          "BOUNDED",
+		Valuation:     "INTERNAL",
+		State:         "INPUT",
+		ChildrenCount: 1,
 	}
 
 	var expectedFolder = DatasetElement{
-		CreatedAt: time.Date(3000, 1, 1, 0, 0, 0, 123456000, time.UTC),
-		CreatedBy: "Kari Nordmann",
-		Path:      "foo/bar",
-		Type:      "",
-		Valuation: "",
-		State:     "",
-		Depth:     2,
+		CreatedAt:     time.Date(3000, 1, 1, 0, 0, 0, 123456000, time.UTC),
+		CreatedBy:     "Kari Nordmann",
+		Path:          "foo/bar",
+		Type:          "",
+		Valuation:     "",
+		State:         "",
+		ChildrenCount: 2,
 	}
 
 	datasets, err := client.ListDatasets("foo")
