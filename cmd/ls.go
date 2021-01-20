@@ -12,10 +12,9 @@ import (
 	"time"
 )
 
-func init() {
-	rootCmd.AddCommand(lsCommand)
-}
-
+var (
+	lsLong   bool
+)
 var lsCommand = &cobra.Command{
 	Use:   "ls [PATH]...",
 	Short: "List information about the dataset(s) under PATH",
@@ -44,7 +43,11 @@ var lsCommand = &cobra.Command{
 		// Use newline when not in terminal (piped)
 		var printFunction func(datasets *rest.DatasetResponse, output io.Writer)
 		if fileInfo, _ := os.Stdout.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
-			printFunction = printTabular
+			if lsLong {
+				printFunction = printTabularDetails
+			} else {
+				printFunction = printTabular
+			}
 		} else {
 			printFunction = printNewLine
 		}
@@ -59,6 +62,11 @@ var lsCommand = &cobra.Command{
 	},
 }
 
+func init() {
+	lsCommand.Flags().BoolVarP(&lsLong, "", "l", false, "use a long listing format")
+	rootCmd.AddCommand(lsCommand)
+}
+
 // Prints the dataset names
 func printNewLine(datasets *rest.DatasetResponse, output io.Writer) {
 	writer := bufio.NewWriter(output)
@@ -68,8 +76,30 @@ func printNewLine(datasets *rest.DatasetResponse, output io.Writer) {
 	}
 }
 
-// Prints the datasets in tabular format. Datasets are white and folders blue and with a trailing '/'
 func printTabular(datasets *rest.DatasetResponse, output io.Writer) {
+	folderContext := ansiterm.Foreground(ansiterm.Blue)
+	folderContext.SetStyle(ansiterm.Bold)
+	datasetContext := ansiterm.Foreground(ansiterm.Default)
+
+	writer := ansiterm.NewTabWriter(output, 15, 0, 2, ' ', 0);
+	defer writer.Flush()
+
+	// Print the folders first.
+	for _, dataset := range *datasets {
+		if dataset.Depth > 0 {
+			folderContext.Fprintf(writer, "%s", dataset.Path)
+			datasetContext.Fprint(writer, "/\t")
+		}
+	}
+	for _, dataset := range *datasets {
+		if dataset.Depth == 0 {
+			datasetContext.Fprintf(writer, "%s\t", dataset.Path)
+		}
+	}
+}
+
+// Prints the datasets in tabular format. Datasets are white and folders blue and with a trailing '/'
+func printTabularDetails(datasets *rest.DatasetResponse, output io.Writer) {
 	writer := ansiterm.NewTabWriter(output, 32, 0, 2, ' ', 0)
 	headerContext := ansiterm.Foreground(ansiterm.BrightCyan)
 	headerContext.SetStyle(ansiterm.Bold)
@@ -79,7 +109,7 @@ func printTabular(datasets *rest.DatasetResponse, output io.Writer) {
 	defer writer.Flush()
 	headerContext.Fprint(writer, "Name\tAuthor\tCreated\tType\tValuation\tState\n")
 	for _, dataset := range *datasets {
-		if dataset.ChildrenCount > 1 { // is folder
+		if dataset.Depth > 0 { // is folder
 			folderContext.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
 				dataset.Path+"/",
 				dataset.CreatedBy,
