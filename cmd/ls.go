@@ -9,12 +9,14 @@ import (
 	"github.com/statisticsnorway/dapla-cli/rest"
 	"io"
 	"os"
+	"strings"
 	"time"
 )
 
 var (
-	lsLong   bool
+	lsLong bool
 )
+
 var lsCommand = &cobra.Command{
 	Use:   "ls [PATH]...",
 	Short: "List information about the dataset(s) under PATH",
@@ -22,22 +24,9 @@ var lsCommand = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if jupyter && bearerToken != "" {
-			panic(errors.New("cannot use both --jupyter and --token"))
-		}
-
-		var client *rest.Client
-		switch {
-		case jupyter:
-			var err error
-			client, err = rest.NewClientWithJupyter(serverUrl)
-			if err != nil {
-				panic(err)
-			}
-		case bearerToken != "":
-			client = rest.NewClient(serverUrl, bearerToken)
-		default:
-			panic(errors.New("use --jupyter or define the --token"))
+		var client, err = initClient()
+		if err != nil {
+			panic(err)
 		}
 
 		// Use newline when not in terminal (piped)
@@ -55,11 +44,91 @@ var lsCommand = &cobra.Command{
 		for _, path := range args {
 			res, err := client.ListDatasets(path)
 			if err != nil {
-				panic(err)
+				if strings.HasSuffix(err.Error(), "404") {
+					fmt.Printf("Cannot access %s: No such dataset or folder", path)
+				} else {
+					panic(err) //TODO don't panic
+				}
+			} else {
+				printFunction(res, os.Stdout)
 			}
-			printFunction(res, os.Stdout)
 		}
 	},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+
+		// TODO make test(s)!
+
+		var client, err = initClient()
+		if err != nil {
+			panic(err)
+		}
+		var res *rest.DatasetResponse
+
+		if toComplete == "/" {
+			res, err = client.ListDatasets(toComplete)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveError
+			}
+			var result []string
+			for _, element := range *res {
+				result = append(result, element.Path)
+			}
+			return result, cobra.ShellCompDirectiveNoFileComp
+		} else if strings.HasPrefix(toComplete, "/") {
+			var result []string
+
+			// Ask for list without last element
+			var parentPath = toComplete[0:strings.LastIndex(toComplete, "/")]
+			res, err = client.ListDatasets(parentPath)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveError
+			}
+
+			// Check if last element is a valid path / dataset
+			var partialPath = toComplete[strings.LastIndex(toComplete, "/")+1:]
+			for _, element := range *res {
+				// We have a complete match, ask data-maintenance for elements on that path
+				if toComplete == element.Path {
+					res, err = client.ListDatasets(toComplete)
+					if err != nil {
+						return nil, cobra.ShellCompDirectiveError
+					} else {
+						for _, element := range *res {
+							result = append(result, element.Path)
+						}
+						return result, cobra.ShellCompDirectiveNoFileComp
+					}
+				} else { // find all elements that matches the last element in the provided path
+					var lastPart = element.Path[strings.LastIndex(element.Path, "/")+1 : len(element.Path)]
+					if strings.HasPrefix(lastPart, partialPath) {
+						// TODO add trailing / to folder element
+						result = append(result, element.Path)
+					}
+				}
+			}
+			return result, cobra.ShellCompDirectiveNoFileComp
+		} else {
+			return []string{"/"}, cobra.ShellCompDirectiveNoFileComp
+		}
+
+	},
+}
+
+func initClient() (*rest.Client, error) {
+	if jupyter && bearerToken != "" {
+		panic(errors.New("cannot use both --jupyter and --token"))
+	}
+
+	switch {
+
+	case jupyter:
+		return rest.NewClientWithJupyter(serverUrl)
+
+	case bearerToken != "":
+		return rest.NewClient(serverUrl, bearerToken), nil
+	default:
+		return nil, errors.New("use --jupyter or define the --token")
+	}
 }
 
 func init() {
@@ -81,7 +150,7 @@ func printTabular(datasets *rest.DatasetResponse, output io.Writer) {
 	folderContext.SetStyle(ansiterm.Bold)
 	datasetContext := ansiterm.Foreground(ansiterm.Default)
 
-	writer := ansiterm.NewTabWriter(output, 15, 0, 2, ' ', 0);
+	writer := ansiterm.NewTabWriter(output, 15, 0, 2, ' ', 0)
 	defer writer.Flush()
 
 	// Print the folders first.
