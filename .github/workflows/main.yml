@@ -32,28 +32,18 @@ jobs:
       - name: run tests
         run: go test -json ./... > test.json
         
-  release-linux-amd64:
-    name: release linux/amd64
+  releases-matrix:
+    name: Release Go Binary
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # build and publish in parallel: linux/386, linux/amd64, windows/386, windows/amd64, darwin/386, darwin/amd64 
+        goos: [linux, windows, darwin]
+        goarch: ["386", amd64]
     steps:
-    - uses: actions/checkout@master
-    - name: compile and release
-      uses: ngs/go-release.action@v1.0.2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GOARCH: amd64
-        GOOS: linux
-        EXTRA_FILES: "LICENSE"
-  
-  release-windows-amd64:
-    name: release windows/amd64
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - name: compile and release
-      uses: ngs/go-release.action@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GOARCH: amd64
-        GOOS: windows
-        EXTRA_FILES: "LICENSE"
+    - uses: actions/checkout@v2
+    - uses: wangyoucao577/go-release-action@v1.14
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
