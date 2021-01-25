@@ -143,7 +143,7 @@ func normalizeCompleteElement(element rest.DatasetElement) string {
 	if strings.HasSuffix(element.Path, "/") {
 		path = strings.TrimSuffix(path, "/")
 	}
-	if element.Depth > 0 {
+	if element.IsFolder() {
 		path = path + "/"
 	}
 	return path
@@ -196,17 +196,17 @@ func printTabular(datasets *rest.DatasetResponse, output io.Writer) {
 
 	// Print the folders first.
 	for _, dataset := range *datasets {
-		if dataset.Depth > 0 {
+		if dataset.IsFolder() {
 			folderContext.Fprintf(writer, "%s", dataset.Path)
 			datasetContext.Fprint(writer, "/\t")
 		}
 	}
 	for _, dataset := range *datasets {
-		if dataset.Depth == 0 {
+		if dataset.IsDataset() {
 			datasetContext.Fprintf(writer, "%s\t", dataset.Path)
 		}
 	}
-	fmt.Fprintln(writer)
+	_, _ = fmt.Fprintln(writer)
 }
 
 // Prints the datasets in tabular format. Datasets are white and folders blue and with a trailing '/'
@@ -220,7 +220,7 @@ func printTabularDetails(datasets *rest.DatasetResponse, output io.Writer) {
 	defer writer.Flush()
 	headerContext.Fprint(writer, "Name\tAuthor\tCreated\tType\tValuation\tState\n")
 	for _, dataset := range *datasets {
-		if dataset.Depth > 0 { // is folder
+		if dataset.IsFolder() {
 			folderContext.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
 				dataset.Path+"/",
 				dataset.CreatedBy,

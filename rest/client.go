@@ -32,7 +32,11 @@ type DatasetElement struct {
 }
 
 func (e DatasetElement) IsFolder() bool {
-	return e.Depth > 1
+	return e.Depth > 0
+}
+
+func (e DatasetElement) IsDataset() bool {
+	return !e.IsFolder()
 }
 
 func NewClient(baseURL string, authBearer string) *Client {
