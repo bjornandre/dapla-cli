@@ -2,7 +2,7 @@ package rest
 
 import (
 	"github.com/google/go-cmp/cmp"
-	"github.com/h2non/gock"
+	"gopkg.in/h2non/gock.v1"
 	"net/http"
 	"testing"
 	"time"
@@ -44,7 +44,7 @@ func TestClient_ListDatasets(t *testing.T) {
 	"type": "BOUNDED",
 	"valuation": "INTERNAL",
 	"state": "INPUT",
-	"childrenCount": 1
+	"depth": 1
 },{
     "createdBy": "Kari Nordmann",
     "createdDate": "3000-01-01T00:00:00.123456Z",
@@ -52,7 +52,7 @@ func TestClient_ListDatasets(t *testing.T) {
 	"type": "UNBOUNDED",
 	"valuation": "SENSITIVE",
 	"state": "RAW",
-	"childrenCount": 1
+	"depth": 1
 },{
     "createdBy": "Kari Nordmann",
     "createdDate": "3000-01-01T00:00:00.123456Z",
@@ -60,7 +60,7 @@ func TestClient_ListDatasets(t *testing.T) {
 	"type": "",
 	"valuation": "",
 	"state": "",
-	"childrenCount": 2
+	"depth": 2
 }]
 `)
 
@@ -76,7 +76,7 @@ func TestClient_ListDatasets(t *testing.T) {
 		Type:          "BOUNDED",
 		Valuation:     "INTERNAL",
 		State:         "INPUT",
-		ChildrenCount: 1,
+		Depth: 1,
 	}
 
 	var expectedFolder = DatasetElement{
@@ -86,7 +86,7 @@ func TestClient_ListDatasets(t *testing.T) {
 		Type:          "",
 		Valuation:     "",
 		State:         "",
-		ChildrenCount: 2,
+		Depth: 2,
 	}
 
 	datasets, err := client.ListDatasets("foo")
