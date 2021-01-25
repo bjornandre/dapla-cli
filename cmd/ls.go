@@ -165,6 +165,7 @@ func printTabular(datasets *rest.DatasetResponse, output io.Writer) {
 			datasetContext.Fprintf(writer, "%s\t", dataset.Path)
 		}
 	}
+	fmt.Fprintln(writer)
 }
 
 // Prints the datasets in tabular format. Datasets are white and folders blue and with a trailing '/'
