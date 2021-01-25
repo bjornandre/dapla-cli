@@ -31,6 +31,10 @@ type DatasetElement struct {
 	Depth int       `json:"depth"`
 }
 
+func (e DatasetElement) IsFolder() bool {
+	return e.Depth > 1
+}
+
 func NewClient(baseURL string, authBearer string) *Client {
 	return &Client{
 		BaseURL:    baseURL,

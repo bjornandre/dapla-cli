@@ -60,58 +60,99 @@ var lsCommand = &cobra.Command{
 
 		var client, err = initClient()
 		if err != nil {
-			panic(err)
+			return handleCompleteError("could not initialize client: %s", err)
 		}
+
+		if toComplete == "" {
+			return []string{"/"}, cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp
+		}
+
 		var res *rest.DatasetResponse
 
 		if toComplete == "/" {
 			res, err = client.ListDatasets(toComplete)
 			if err != nil {
-				return nil, cobra.ShellCompDirectiveError
+				return handleCompleteError("could not fetch list: %s", err)
+			} else {
+				return formatCompleteResult(res)
 			}
-			var result []string
-			for _, element := range *res {
-				result = append(result, element.Path)
-			}
-			return result, cobra.ShellCompDirectiveNoFileComp
-		} else if strings.HasPrefix(toComplete, "/") {
-			var result []string
-
-			// Ask for list without last element
-			var parentPath = toComplete[0:strings.LastIndex(toComplete, "/")]
-			res, err = client.ListDatasets(parentPath)
-			if err != nil {
-				return nil, cobra.ShellCompDirectiveError
-			}
-
-			// Check if last element is a valid path / dataset
-			var partialPath = toComplete[strings.LastIndex(toComplete, "/")+1:]
-			for _, element := range *res {
-				// We have a complete match, ask data-maintenance for elements on that path
-				if toComplete == element.Path {
-					res, err = client.ListDatasets(toComplete)
-					if err != nil {
-						return nil, cobra.ShellCompDirectiveError
-					} else {
-						for _, element := range *res {
-							result = append(result, element.Path)
-						}
-						return result, cobra.ShellCompDirectiveNoFileComp
-					}
-				} else { // find all elements that matches the last element in the provided path
-					var lastPart = element.Path[strings.LastIndex(element.Path, "/")+1 : len(element.Path)]
-					if strings.HasPrefix(lastPart, partialPath) {
-						// TODO add trailing / to folder element
-						result = append(result, element.Path)
-					}
-				}
-			}
-			return result, cobra.ShellCompDirectiveNoFileComp
-		} else {
-			return []string{"/"}, cobra.ShellCompDirectiveNoFileComp
 		}
 
+		// Special case with missing root slash.
+		if !strings.HasPrefix(toComplete, "/") {
+			return []string{"/" + toComplete}, cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp
+		}
+
+		// Ask for list without last element
+		var parentPath = toComplete[0:strings.LastIndex(toComplete, "/")]
+		res, err = client.ListDatasets(parentPath)
+		if err != nil {
+			return handleCompleteError("could not fetch list: ", err)
+		}
+
+		// Check if last element is a valid path / dataset
+		var partialPath = toComplete[strings.LastIndex(toComplete, "/")+1:]
+		for _, element := range *res {
+			// We have a complete match, ask data-maintenance for elements on that path
+			if toComplete == element.Path {
+				res, err = client.ListDatasets(toComplete)
+				if err != nil {
+					return handleCompleteError("could not fetch list: ", err)
+				} else {
+					return formatCompleteResult(res)
+				}
+			}
+		}
+
+		var matches rest.DatasetResponse
+		for _, element := range *res {
+			// find all elements that matches the last element in the provided path
+			var lastPart = element.Path[strings.LastIndex(element.Path, "/")+1 : len(element.Path)]
+			if strings.HasPrefix(lastPart, partialPath) {
+				matches = append(matches, element)
+			}
+		}
+		return formatCompleteResult(&matches)
 	},
+}
+
+// Format and set the flags based on the given elements
+func formatCompleteResult(elements *rest.DatasetResponse) ([]string, cobra.ShellCompDirective) {
+	var suggestions []string
+	var hasFolders = false
+	var flags = cobra.ShellCompDirectiveNoFileComp
+
+	for _, element := range *elements {
+		if element.IsFolder() {
+			hasFolders = true
+		}
+		suggestions = append(suggestions, normalizeCompleteElement(element))
+	}
+
+	// No space if folder or more than one element
+	if hasFolders || len(*elements) > 1 {
+		flags = flags | cobra.ShellCompDirectiveNoSpace
+	}
+
+	return suggestions, flags
+}
+
+// Normalize the result of auto completion.
+func normalizeCompleteElement(element rest.DatasetElement) string {
+	path := element.Path
+	if strings.HasSuffix(element.Path, "/") {
+		path = strings.TrimSuffix(path, "/")
+	}
+	if element.Depth > 0 {
+		path = path + "/"
+	}
+	return path
+}
+
+// Handle the errors from the auto complete method.
+func handleCompleteError(message string, err error) ([]string, cobra.ShellCompDirective) {
+	_, _ = fmt.Fprintln(os.Stderr, message, err.Error())
+	return nil, cobra.ShellCompDirectiveError | cobra.ShellCompDirectiveNoFileComp
 }
 
 func initClient() (*rest.Client, error) {
