@@ -69,24 +69,24 @@ func TestClient_ListDatasets(t *testing.T) {
 
 	var client = NewClient("http://server.com", "a secret secret")
 
-	var expectedDataset = DatasetElement{
-		CreatedAt:     time.Date(2000, 1, 1, 0, 0, 0, 123456000, time.UTC),
-		CreatedBy:     "Ola Nordmann",
-		Path:          "foo/file1",
-		Type:          "BOUNDED",
-		Valuation:     "INTERNAL",
-		State:         "INPUT",
-		Depth: 1,
+	var expectedDataset = ListDatasetElement{
+		CreatedAt: time.Date(2000, 1, 1, 0, 0, 0, 123456000, time.UTC),
+		CreatedBy: "Ola Nordmann",
+		Path:      "foo/file1",
+		Type:      "BOUNDED",
+		Valuation: "INTERNAL",
+		State:     "INPUT",
+		Depth:     1,
 	}
 
-	var expectedFolder = DatasetElement{
-		CreatedAt:     time.Date(3000, 1, 1, 0, 0, 0, 123456000, time.UTC),
-		CreatedBy:     "Kari Nordmann",
-		Path:          "foo/bar",
-		Type:          "",
-		Valuation:     "",
-		State:         "",
-		Depth: 2,
+	var expectedFolder = ListDatasetElement{
+		CreatedAt: time.Date(3000, 1, 1, 0, 0, 0, 123456000, time.UTC),
+		CreatedBy: "Kari Nordmann",
+		Path:      "foo/bar",
+		Type:      "",
+		Valuation: "",
+		State:     "",
+		Depth:     2,
 	}
 
 	datasets, err := client.ListDatasets("foo")

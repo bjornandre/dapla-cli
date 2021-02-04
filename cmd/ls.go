@@ -30,7 +30,7 @@ var lsCommand = &cobra.Command{
 		}
 
 		// Use newline when not in terminal (piped)
-		var printFunction func(datasets *rest.DatasetResponse, output io.Writer)
+		var printFunction func(datasets *rest.ListDatasetResponse, output io.Writer)
 		if fileInfo, _ := os.Stdout.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
 			if lsLong {
 				printFunction = printTabularDetails
@@ -67,7 +67,7 @@ var lsCommand = &cobra.Command{
 			return []string{"/"}, cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp
 		}
 
-		var res *rest.DatasetResponse
+		var res *rest.ListDatasetResponse
 
 		if toComplete == "/" {
 			res, err = client.ListDatasets(toComplete)
@@ -104,7 +104,7 @@ var lsCommand = &cobra.Command{
 			}
 		}
 
-		var matches rest.DatasetResponse
+		var matches rest.ListDatasetResponse
 		for _, element := range *res {
 			// find all elements that matches the last element in the provided path
 			var lastPart = element.Path[strings.LastIndex(element.Path, "/")+1 : len(element.Path)]
@@ -117,7 +117,7 @@ var lsCommand = &cobra.Command{
 }
 
 // Format and set the flags based on the given elements
-func formatCompleteResult(elements *rest.DatasetResponse) ([]string, cobra.ShellCompDirective) {
+func formatCompleteResult(elements *rest.ListDatasetResponse) ([]string, cobra.ShellCompDirective) {
 	var suggestions []string
 	var hasFolders = false
 	var flags = cobra.ShellCompDirectiveNoFileComp
@@ -138,7 +138,7 @@ func formatCompleteResult(elements *rest.DatasetResponse) ([]string, cobra.Shell
 }
 
 // Normalize the result of auto completion.
-func normalizeCompleteElement(element rest.DatasetElement) string {
+func normalizeCompleteElement(element rest.ListDatasetElement) string {
 	path := element.Path
 	if strings.HasSuffix(element.Path, "/") {
 		path = strings.TrimSuffix(path, "/")
@@ -178,7 +178,7 @@ func init() {
 }
 
 // Prints the dataset names
-func printNewLine(datasets *rest.DatasetResponse, output io.Writer) {
+func printNewLine(datasets *rest.ListDatasetResponse, output io.Writer) {
 	writer := bufio.NewWriter(output)
 	defer writer.Flush()
 	for _, dataset := range *datasets {
@@ -186,7 +186,7 @@ func printNewLine(datasets *rest.DatasetResponse, output io.Writer) {
 	}
 }
 
-func printTabular(datasets *rest.DatasetResponse, output io.Writer) {
+func printTabular(datasets *rest.ListDatasetResponse, output io.Writer) {
 	folderContext := ansiterm.Foreground(ansiterm.Blue)
 	folderContext.SetStyle(ansiterm.Bold)
 	datasetContext := ansiterm.Foreground(ansiterm.Default)
@@ -210,7 +210,7 @@ func printTabular(datasets *rest.DatasetResponse, output io.Writer) {
 }
 
 // Prints the datasets in tabular format. Datasets are white and folders blue and with a trailing '/'
-func printTabularDetails(datasets *rest.DatasetResponse, output io.Writer) {
+func printTabularDetails(datasets *rest.ListDatasetResponse, output io.Writer) {
 	writer := ansiterm.NewTabWriter(output, 32, 0, 2, ' ', 0)
 	headerContext := ansiterm.Foreground(ansiterm.BrightCyan)
 	headerContext.SetStyle(ansiterm.Bold)

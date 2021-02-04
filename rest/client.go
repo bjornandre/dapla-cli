@@ -16,26 +16,26 @@ type Client struct {
 	authBearer string
 }
 
-type DatasetResponse []DatasetElement
-
 const jupyterHUBTokenURL = "JUPYTERHUB_HANDLER_CUSTOM_AUTH_URL"
 const jupyterAPIToken = "JUPYTERHUB_API_TOKEN"
 
-type DatasetElement struct {
-	Path          string    `json:"path"`
-	CreatedBy     string    `json:"createdBy"`
-	CreatedAt     time.Time `json:"createdDate"`
-	Type          string    `json:"type"`
-	Valuation     string    `json:"valuation"`
-	State         string    `json:"state"`
-	Depth int       `json:"depth"`
+type ListDatasetElement struct {
+	Path      string    `json:"path"`
+	CreatedBy string    `json:"createdBy"`
+	CreatedAt time.Time `json:"createdDate"`
+	Type      string    `json:"type"`
+	Valuation string    `json:"valuation"`
+	State     string    `json:"state"`
+	Depth     int       `json:"depth"`
 }
 
-func (e DatasetElement) IsFolder() bool {
+type ListDatasetResponse []ListDatasetElement
+
+func (e ListDatasetElement) IsFolder() bool {
 	return e.Depth > 0
 }
 
-func (e DatasetElement) IsDataset() bool {
+func (e ListDatasetElement) IsDataset() bool {
 	return !e.IsFolder()
 }
 
@@ -101,7 +101,7 @@ func (c Client) DeleteDatasets(path string) error {
 	panic(fmt.Sprintf("TODO %s", path))
 }
 
-func (c *Client) ListDatasets(path string) (*DatasetResponse, error) {
+func (c *Client) ListDatasets(path string) (*ListDatasetResponse, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/list/%s", c.BaseURL, path), nil)
 	if err != nil {
 		return nil, err
@@ -121,7 +121,7 @@ func (c *Client) ListDatasets(path string) (*DatasetResponse, error) {
 		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
 
-	resp := DatasetResponse{}
+	resp := ListDatasetResponse{}
 	err = json.NewDecoder(res.Body).Decode(&resp)
 	if err != nil {
 		return nil, err
