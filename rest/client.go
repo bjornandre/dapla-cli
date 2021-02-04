@@ -31,6 +31,17 @@ type ListDatasetElement struct {
 
 type ListDatasetResponse []ListDatasetElement
 
+type DeleteDatasetResponse struct {
+	DatasetPath  string        `json:"datasetPath"`
+	TotalSize    uint64        `json:"totalSize"`
+	DeletedFiles []DatasetFile `json:"deletedFiles"`
+}
+
+type DatasetFile struct {
+	Uri  url.URL `json:"uri"`
+	Size uint64  `json:"size"`
+}
+
 func (e ListDatasetElement) IsFolder() bool {
 	return e.Depth > 0
 }
