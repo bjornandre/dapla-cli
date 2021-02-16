@@ -124,7 +124,7 @@ func printTabularDetails(datasets *rest.ListDatasetResponse, output io.Writer) {
 	writer := ansiterm.NewTabWriter(output, 32, 0, 2, ' ', 0)
 	headerContext := ansiterm.Foreground(ansiterm.BrightCyan)
 	headerContext.SetStyle(ansiterm.Bold)
-	datasetContext := ansiterm.Foreground(ansiterm.White)
+	datasetContext := ansiterm.Foreground(ansiterm.Default)
 	folderContext := ansiterm.Foreground(ansiterm.Blue)
 	folderContext.SetStyle(ansiterm.Italic)
 	defer writer.Flush()
