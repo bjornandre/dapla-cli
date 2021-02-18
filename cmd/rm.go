@@ -3,10 +3,12 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"github.com/statisticsnorway/dapla-cli/rest"
 	"io"
 	"os"
+	"time"
 )
 
 var (
@@ -29,6 +31,11 @@ func newRmCommand() *cobra.Command {
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 
+			// Create and start spinner
+			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+			s.Color("bgWhite", "bold", "black")
+			s.Prefix = "Deleting dataset... "
+			s.Start()
 			var client, err = initClient()
 			if err != nil {
 				panic(err) // TODO don't panic!
@@ -45,7 +52,24 @@ func newRmCommand() *cobra.Command {
 
 			path := args[0]
 			res, err := client.DeleteDatasets(path, rmDryRun)
-			printDeleteResponse(res, os.Stdout, rmDebug, rmDryRun)
+			if err != nil {
+				exitCode := 1
+				switch err.(type) {
+				case *rest.HttpError:
+					exitCode = 0
+				default:
+				}
+				fmt.Println(err.Error() + "\n")
+				os.Exit(exitCode)
+			} else if res != nil {
+				printDeleteResponse(res, os.Stdout, rmDebug, rmDryRun)
+			} else {
+				// TODO what to do if no error and response is nil
+			}
+
+			// Stop spinner
+			// TODO remove spinner when done
+			s.Stop()
 
 		},
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

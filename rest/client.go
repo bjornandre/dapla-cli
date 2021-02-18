@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	errors2 "github.com/pkg/errors"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -15,6 +16,15 @@ type Client struct {
 	BaseURL    string
 	Client     *http.Client
 	authBearer string
+}
+
+type HttpError struct {
+	statusCode int
+	message    string
+}
+
+func (httpError *HttpError) Error() string {
+	return httpError.message + " (" + strconv.Itoa(httpError.statusCode) + ")"
 }
 
 const jupyterHUBTokenURL = "JUPYTERHUB_HANDLER_CUSTOM_AUTH_URL"
@@ -148,6 +158,9 @@ func (c *Client) DeleteDatasets(path string, dryRun bool) (*DeleteDatasetRespons
 	var req *http.Request
 	var err error
 
+	// TODO remove
+	time.Sleep(5 * time.Second)
+
 	if dryRun {
 		req, err = c.createRequest("DELETE", fmt.Sprintf("%s/api/v1/delete/%s", c.BaseURL, path),
 			map[string]string{"dry-run": strconv.FormatBool(dryRun)})
@@ -166,7 +179,11 @@ func (c *Client) DeleteDatasets(path string, dryRun bool) (*DeleteDatasetRespons
 	defer res.Body.Close()
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+		bytes, _ := ioutil.ReadAll(res.Body)
+		return nil, &HttpError{
+			statusCode: res.StatusCode,
+			message:    string(bytes),
+		}
 	}
 
 	resp := DeleteDatasetResponse{}
@@ -191,7 +208,11 @@ func (c *Client) ListDatasets(path string) (*ListDatasetResponse, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		return nil, fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+		bytes, _ := ioutil.ReadAll(res.Body)
+		return nil, &HttpError{
+			statusCode: res.StatusCode,
+			message:    string(bytes),
+		}
 	}
 
 	resp := ListDatasetResponse{}
