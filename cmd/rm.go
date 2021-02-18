@@ -33,7 +33,7 @@ func newRmCommand() *cobra.Command {
 
 			// Create and start spinner
 			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
-			s.Color("bgWhite", "bold", "black")
+			s.Color("reset")
 			s.Prefix = "Deleting dataset... "
 			s.Start()
 			var client, err = initClient()
@@ -65,6 +65,7 @@ func newRmCommand() *cobra.Command {
 				printDeleteResponse(res, os.Stdout, rmDebug, rmDryRun)
 			} else {
 				// TODO what to do if no error and response is nil
+				// 	Hadrien: This should be an invariant. If err == nil then res must be set.
 			}
 
 			// Stop spinner
