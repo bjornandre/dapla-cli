@@ -82,7 +82,7 @@ func newLsCommand() *cobra.Command {
 
 func initClient() (*rest.Client, error) {
 	if jupyter && bearerToken != "" {
-		panic(errors.New("cannot use both --jupyter and --token"))
+		return nil, errors.New("cannot use both --jupyter and --token")
 	}
 
 	switch {
