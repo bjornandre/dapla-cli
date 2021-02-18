@@ -161,12 +161,8 @@ func (c *Client) DeleteDatasets(path string, dryRun bool) (*DeleteDatasetRespons
 	// TODO remove
 	time.Sleep(5 * time.Second)
 
-	if dryRun {
-		req, err = c.createRequest("DELETE", fmt.Sprintf("%s/api/v1/delete/%s", c.BaseURL, path),
-			map[string]string{"dry-run": strconv.FormatBool(dryRun)})
-	} else {
-		req, err = c.createRequest("DELETE", fmt.Sprintf("%s/api/v1/delete/%s", c.BaseURL, path), nil)
-	}
+	req, err = c.createRequest("DELETE", fmt.Sprintf("%s/api/v1/delete/%s", c.BaseURL, path),
+		map[string]string{"dry-run": strconv.FormatBool(dryRun)})
 
 	if err != nil {
 		return nil, err
