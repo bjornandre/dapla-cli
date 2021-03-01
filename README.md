@@ -45,6 +45,8 @@ Alternatively one can provide an authentication token manually using the `--toke
 
 ### ls (list)
 
+The list command lists the datasets and folders under the PATH.
+
 ```
 $ dapla ls --help 
 Usage:
@@ -66,4 +68,20 @@ $ dapla ls /
 
 ### rm (remove)
 
+The rm command deletes **all** the versions of a dataset for a particular path.
+
+```
+$ dapla rm --help
+
+Usage:
+  dapla rm [PATH]... [flags]
+
+Flags:
+  -d, --debug     print debug information
+      --dry-run   dry run
+  -h, --help      help for rm
+```
+
 ### completion
+
+The completion command can be used to setup autocompletion. Refer to the [cobra documentation](https://github.com/spf13/cobra/blob/master/shell_completions.md) for more details.
