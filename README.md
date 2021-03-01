@@ -1,4 +1,4 @@
-# dapla-cli
+# dapla-cli [![CI](https://github.com/statisticsnorway/dapla-cli/actions/workflows/main.yml/badge.svg)](https://github.com/statisticsnorway/dapla-cli/actions/workflows/main.yml)
 
 The dapla cli is a command-line application users can use to interract with the da(ta)pla(form). The command 
 has several sub-commands.
