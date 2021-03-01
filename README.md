@@ -27,11 +27,14 @@ Use "dapla [command] --help" for more information about a command.
 
 ## Installation
 
-The command is already installed in the dapla jupyterlab environement. To install the command locally extract the content of the release archive on your computer and alias the `dapla-cli` executable to `dapla`.
+**NOTE**: The command is already installed in the dapla jupyterlab environement.
+
+To install the command locally download the latest release archive and extract its content on your computer.
+Alias the `dapla-cli` executable to `dapla`.
 
 ## Authentication
 
-In order to be able to communicate with the API servers one need to provide an authentication methods and the API server URI. 
+In order to be able to communicate with the API servers you need to provide an authentication methods and the API server URI. 
 
 The flags `--jupyter` can be used when the dapla command runs inside the container. In this case the application will try to retrieve the authentication token by itself: 
 
