@@ -45,6 +45,25 @@ Alternatively one can provide an authentication token manually using the `--toke
 
 ### ls (list)
 
+```
+$ dapla ls --help 
+Usage:
+  dapla ls [PATH]... [flags]
+
+Flags:
+  -l, --       use a long listing format
+  -h, --help   help for ls
+
+$ dapla ls /
+/felles/
+/kilde/
+/produkt/
+/raw/
+/skatt/
+/tmp/
+/user/
+```
+
 ### rm (remove)
 
 ### completion
