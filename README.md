@@ -29,7 +29,7 @@ Use "dapla [command] --help" for more information about a command.
 
 **NOTE**: The command is already installed in the dapla jupyterlab environement.
 
-To install the command locally download the latest release archive and extract its content on your computer.
+To install the command locally [download](https://github.com/statisticsnorway/dapla-cli/releases) the latest release archive and extract its content on your computer.
 Alias the `dapla-cli` executable to `dapla`.
 
 ## Authentication
