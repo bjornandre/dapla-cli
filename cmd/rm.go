@@ -24,8 +24,8 @@ func init() {
 func newRmCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "rm [PATH]...",
-		Short: "Remove the dataset(s) under PATH",
-		Long:  `TODO`,
+		Short: "Delete dataset(s)",
+		Long:  `The rm command deletes all the version of a given dataset`,
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 

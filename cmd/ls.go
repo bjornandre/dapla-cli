@@ -20,8 +20,8 @@ var (
 func newLsCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "ls [PATH]...",
-		Short: "List information about the dataset(s) under PATH",
-		Long:  `TODO`,
+		Short: "List the datasets and folders under a PATH",
+		Long:  `The ls command list the datasets and folders under a given PATH.`,
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 
