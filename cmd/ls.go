@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/briandowns/spinner"
-	"github.com/juju/ansiterm"
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/statisticsnorway/dapla-cli/rest"
 	"io"
 	"os"
+	"strings"
+	"text/tabwriter"
 	"time"
 )
 
@@ -21,8 +23,8 @@ func newLsCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "ls [PATH]...",
 		Short: "List the datasets and folders under a PATH",
-		Long:  `The ls command list the datasets and folders under a given PATH.`,
-		Args:  cobra.MinimumNArgs(1),
+		Long: `The ls 	command list the datasets and folders under a given PATH.`,
+		Args: cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 
 			// Create and start spinner
@@ -61,7 +63,12 @@ func newLsCommand() *cobra.Command {
 					fmt.Println(err.Error() + "\n")
 					os.Exit(exitCode)
 				} else if res != nil {
-					printFunction(res, os.Stdout)
+					// Strip the common prefix. Note that we are mutating the
+					// elements of res and therefore need to use index notation.
+					var prefix = strings.TrimSuffix(path, "/") + "/"
+					for i := 0; i < len(*res); i++ {
+						(*res)[i].Path = strings.TrimPrefix((*res)[i].Path, prefix)
+					}
 				} else {
 					// TODO what to do if no error and response is nil
 				}
@@ -112,24 +119,33 @@ func printNewLine(datasets *rest.ListDatasetResponse, output io.Writer) {
 	}
 }
 
-func printTabular(datasets *rest.ListDatasetResponse, output io.Writer) {
-	folderContext := ansiterm.Foreground(ansiterm.Blue)
-	folderContext.SetStyle(ansiterm.Bold)
-	datasetContext := ansiterm.Foreground(ansiterm.Default)
+type ColorWriter struct {
+	out io.Writer
+}
 
-	writer := ansiterm.NewTabWriter(output, 15, 0, 2, ' ', 0)
+func (c ColorWriter) Write(p []byte) (int, error) {
+	// Simply send the result of replace tag. Note that we need
+	// to send the size of the buffer.
+	_, err := fmt.Fprint(c.out, color.ReplaceTag(string(p)))
+	return len(p), err
+}
+
+func printTabular(datasets *rest.ListDatasetResponse, output io.Writer) {
+	colorOutput := ColorWriter{out: output}
+	// TODO: Test with strip escape (\xff[colorstuff]\xff" ).
+	writer := tabwriter.NewWriter(colorOutput, 15, 0, 2, ' ',
+		tabwriter.Debug|tabwriter.FilterHTML|tabwriter.StripEscape)
 	defer writer.Flush()
 
 	// Print the folders first.
 	for _, dataset := range *datasets {
 		if dataset.IsFolder() {
-			folderContext.Fprintf(writer, "%s", dataset.Path)
-			datasetContext.Fprint(writer, "/\t")
+			fmt.Fprintf(writer, "<fg=blue;op=bold;>%s</>/\t", dataset.Path)
 		}
 	}
 	for _, dataset := range *datasets {
 		if dataset.IsDataset() {
-			datasetContext.Fprintf(writer, "%s\t", dataset.Path)
+			fmt.Fprint(writer, dataset.Path, "\t")
 		}
 	}
 	_, _ = fmt.Fprintln(writer)
@@ -137,31 +153,35 @@ func printTabular(datasets *rest.ListDatasetResponse, output io.Writer) {
 
 // Prints the datasets in tabular format. Datasets are white and folders blue and with a trailing '/'
 func printTabularDetails(datasets *rest.ListDatasetResponse, output io.Writer) {
-	writer := ansiterm.NewTabWriter(output, 32, 0, 2, ' ', 0)
-	headerContext := ansiterm.Foreground(ansiterm.BrightCyan)
-	headerContext.SetStyle(ansiterm.Bold)
-	datasetContext := ansiterm.Foreground(ansiterm.Default)
-	folderContext := ansiterm.Foreground(ansiterm.Blue)
-	folderContext.SetStyle(ansiterm.Italic)
+	colorOutput := ColorWriter{out: output}
+	writer := tabwriter.NewWriter(colorOutput, 15, 0, 2, ' ',
+		tabwriter.FilterHTML)
 	defer writer.Flush()
-	headerContext.Fprint(writer, "Name\tAuthor\tCreated\tType\tValuation\tState\n")
+
+	fmt.Fprintln(writer,
+		"<bold>Name</>\t"+
+			"<bold>Author</>\t"+
+			"<bold>Created</>\t"+
+			"<bold>Type</>\t"+
+			"<bold>Valuation</>\t"+
+			"<bold>State</>\t")
 	for _, dataset := range *datasets {
 		if dataset.IsFolder() {
-			folderContext.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
-				dataset.Path+"/",
-				dataset.CreatedBy,
-				dataset.CreatedAt.Format(time.RFC3339),
-				dataset.Type,
-				dataset.Valuation,
-				dataset.State)
+			fmt.Fprintln(writer,
+				color.WrapTag(dataset.Path, "blue")+"/", "\t",
+				dataset.CreatedBy+"\t",
+				dataset.CreatedAt.Format(time.RFC3339), "\t",
+				dataset.Type, "\t",
+				dataset.Valuation, "\t",
+				dataset.State, "\t")
 		} else {
-			datasetContext.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n",
-				dataset.Path,
-				dataset.CreatedBy,
-				dataset.CreatedAt.Format(time.RFC3339),
-				dataset.Type,
-				dataset.Valuation,
-				dataset.State)
+			fmt.Fprintln(writer,
+				dataset.Path, "\t",
+				dataset.CreatedBy, "\t",
+				dataset.CreatedAt.Format(time.RFC3339), "\t",
+				dataset.Type, "\t",
+				dataset.Valuation, "\t",
+				dataset.State, "\t")
 		}
 	}
 }
