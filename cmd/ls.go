@@ -137,15 +137,26 @@ func printTabular(datasets *rest.ListDatasetResponse, output io.Writer) {
 		tabwriter.Debug|tabwriter.FilterHTML|tabwriter.StripEscape)
 	defer writer.Flush()
 
+	n := 0
+	maxColumns := 5
 	// Print the folders first.
 	for _, dataset := range *datasets {
+
 		if dataset.IsFolder() {
 			fmt.Fprintf(writer, "<fg=blue;op=bold;>%s</>/\t", dataset.Path)
+			n++
+			if n%maxColumns == 0 {
+				fmt.Fprintln(writer)
+			}
 		}
 	}
 	for _, dataset := range *datasets {
 		if dataset.IsDataset() {
 			fmt.Fprint(writer, dataset.Path, "\t")
+			n++
+			if n%maxColumns == 0 {
+				fmt.Fprintln(writer)
+			}
 		}
 	}
 	_, _ = fmt.Fprintln(writer)
