@@ -133,8 +133,7 @@ func (c ColorWriter) Write(p []byte) (int, error) {
 func printTabular(datasets *rest.ListDatasetResponse, output io.Writer) {
 	colorOutput := ColorWriter{out: output}
 	// TODO: Test with strip escape (\xff[colorstuff]\xff" ).
-	writer := tabwriter.NewWriter(colorOutput, 15, 0, 2, ' ',
-		tabwriter.Debug|tabwriter.FilterHTML|tabwriter.StripEscape)
+	writer := tabwriter.NewWriter(colorOutput, 15, 0, 2, ' ', tabwriter.FilterHTML)
 	defer writer.Flush()
 
 	n := 0
@@ -165,8 +164,7 @@ func printTabular(datasets *rest.ListDatasetResponse, output io.Writer) {
 // Prints the datasets in tabular format. Datasets are white and folders blue and with a trailing '/'
 func printTabularDetails(datasets *rest.ListDatasetResponse, output io.Writer) {
 	colorOutput := ColorWriter{out: output}
-	writer := tabwriter.NewWriter(colorOutput, 15, 0, 2, ' ',
-		tabwriter.FilterHTML)
+	writer := tabwriter.NewWriter(colorOutput, 15, 0, 2, ' ', tabwriter.FilterHTML)
 	defer writer.Flush()
 
 	fmt.Fprintln(writer,
