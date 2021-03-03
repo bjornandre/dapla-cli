@@ -3,10 +3,12 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"github.com/statisticsnorway/dapla-cli/rest"
 	"io"
 	"os"
+	"time"
 )
 
 var (
@@ -24,28 +26,37 @@ func init() {
 func newRmCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "rm [PATH]...",
-		Short: "Remove the dataset(s) under PATH",
-		Long:  `TODO`,
+		Short: "Delete dataset(s)",
+		Long:  `The rm command deletes all the version of a given dataset`,
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 
+			path := args[0]
+
+			// Create and start spinner
+			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
+			s.Color("reset")
+			s.Prefix = "Deleting dataset " + path + " "
+			s.Start()
 			var client, err = initClient()
 			if err != nil {
 				panic(err) // TODO don't panic!
 			}
 
-			// Send delete request
-			// Display spinner (only on terminals!)
-			// Handle timeout
-			// Handle no access to one version
-			// Handle no access at all
-			// Handle invalid path
-
-			// Format output with debug/dry-run
-
-			path := args[0]
 			res, err := client.DeleteDatasets(path, rmDryRun)
-			printDeleteResponse(res, os.Stdout, rmDebug, rmDryRun)
+			s.Stop()
+			if err != nil {
+				exitCode := 1
+				switch err.(type) {
+				case *rest.HttpError:
+					exitCode = 0
+				default:
+				}
+				fmt.Println(err.Error() + "\n")
+				os.Exit(exitCode)
+			} else {
+				printDeleteResponse(res, os.Stdout, rmDebug, rmDryRun)
+			}
 
 		},
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -98,7 +109,7 @@ func printDeleteResponse(deleteResponse *rest.DeleteDatasetResponse, output io.W
 		pluralize("version", len(deleteResponse.DatasetVersion)))
 
 	if dryRun {
-		fmt.Fprintf(writer, "The dry-run flag was set. NO FILES WERE DELETED.")
+		fmt.Fprintf(writer, "The dry-run flag was set. NO FILES WERE DELETED.\n\r")
 	}
 }
 
