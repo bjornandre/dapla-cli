@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/briandowns/spinner"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/statisticsnorway/dapla-cli/rest"
@@ -26,12 +25,6 @@ func newLsCommand() *cobra.Command {
 		Long: `The ls 	command list the datasets and folders under a given PATH.`,
 		Args: cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-
-			// Create and start spinner
-			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
-			s.Color("bgWhite", "bold", "black")
-			s.Prefix = "Listing... "
-			s.Start()
 
 			var client, err = initClient()
 			if err != nil {
@@ -69,14 +62,12 @@ func newLsCommand() *cobra.Command {
 					for i := 0; i < len(*res); i++ {
 						(*res)[i].Path = strings.TrimPrefix((*res)[i].Path, prefix)
 					}
+					printFunction(res, os.Stdout)
 				} else {
 					// TODO what to do if no error and response is nil
 				}
 			}
 
-			// Stop spinner
-			// TODO remove spinner when done
-			s.Stop()
 		},
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 

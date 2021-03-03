@@ -31,27 +31,20 @@ func newRmCommand() *cobra.Command {
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 
+			path := args[0]
+
 			// Create and start spinner
-			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
 			s.Color("reset")
-			s.Prefix = "Deleting dataset... "
+			s.Prefix = "Deleting dataset " + path + " "
 			s.Start()
 			var client, err = initClient()
 			if err != nil {
 				panic(err) // TODO don't panic!
 			}
 
-			// Send delete request
-			// Display spinner (only on terminals!)
-			// Handle timeout
-			// Handle no access to one version
-			// Handle no access at all
-			// Handle invalid path
-
-			// Format output with debug/dry-run
-
-			path := args[0]
 			res, err := client.DeleteDatasets(path, rmDryRun)
+			s.Stop()
 			if err != nil {
 				exitCode := 1
 				switch err.(type) {
@@ -61,16 +54,9 @@ func newRmCommand() *cobra.Command {
 				}
 				fmt.Println(err.Error() + "\n")
 				os.Exit(exitCode)
-			} else if res != nil {
-				printDeleteResponse(res, os.Stdout, rmDebug, rmDryRun)
 			} else {
-				// TODO what to do if no error and response is nil
-				// 	Hadrien: This should be an invariant. If err == nil then res must be set.
+				printDeleteResponse(res, os.Stdout, rmDebug, rmDryRun)
 			}
-
-			// Stop spinner
-			// TODO remove spinner when done
-			s.Stop()
 
 		},
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -123,7 +109,7 @@ func printDeleteResponse(deleteResponse *rest.DeleteDatasetResponse, output io.W
 		pluralize("version", len(deleteResponse.DatasetVersion)))
 
 	if dryRun {
-		fmt.Fprintf(writer, "The dry-run flag was set. NO FILES WERE DELETED.")
+		fmt.Fprintf(writer, "The dry-run flag was set. NO FILES WERE DELETED.\n\r")
 	}
 }
 
