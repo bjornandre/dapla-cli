@@ -1,34 +1,13 @@
-package rest
+package maintenance
 
 import (
-	"github.com/google/go-cmp/cmp"
-	"gopkg.in/h2non/gock.v1"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
+	"gopkg.in/h2non/gock.v1"
 )
-
-func TestClient_fetchJupyterToken(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("http://server.com").
-		Get("/foo/bar/token").
-		MatchHeader("Authorization", "^token the api token$").
-		Reply(http.StatusOK).
-		BodyString(`{ "access_token": "the access token"}`)
-
-	gock.New("http://server.com").
-		Reply(http.StatusForbidden)
-
-	token, err := fetchJupyterToken("http://server.com/foo/bar/token", "the api token")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if token != "the access token" {
-		t.Errorf("expected %s but got %s", "the access token", token)
-	}
-}
 
 func TestClient_ListDatasets(t *testing.T) {
 	defer gock.Off()
@@ -145,15 +124,15 @@ func TestClient_DeleteDatasets(t *testing.T) {
 			{
 				Timestamp: time.Date(2000, 1, 1, 0, 0, 0, 123456000, time.UTC),
 				DeletedFiles: []DatasetFile{
-					{Uri: "gs://bucket/prefix/foo/bar/v1/file1", Size: 1},
-					{Uri: "gs://bucket/prefix/foo/bar/v1/file2", Size: 2},
+					{URI: "gs://bucket/prefix/foo/bar/v1/file1", Size: 1},
+					{URI: "gs://bucket/prefix/foo/bar/v1/file2", Size: 2},
 				},
 			},
 			{
 				Timestamp: time.Date(3000, 1, 1, 0, 0, 0, 123456000, time.UTC),
 				DeletedFiles: []DatasetFile{
-					{Uri: "gs://bucket/prefix/foo/bar/v2/file1", Size: 4},
-					{Uri: "gs://bucket/prefix/foo/bar/v2/file2", Size: 8},
+					{URI: "gs://bucket/prefix/foo/bar/v2/file1", Size: 4},
+					{URI: "gs://bucket/prefix/foo/bar/v2/file2", Size: 8},
 				},
 			},
 		},
@@ -210,15 +189,15 @@ func TestClient_DeleteDatasetsDryRun(t *testing.T) {
 			{
 				Timestamp: time.Date(2000, 1, 1, 0, 0, 0, 123456000, time.UTC),
 				DeletedFiles: []DatasetFile{
-					{Uri: "gs://bucket/prefix/foo/bar/v1/file1", Size: 1},
-					{Uri: "gs://bucket/prefix/foo/bar/v1/file2", Size: 2},
+					{URI: "gs://bucket/prefix/foo/bar/v1/file1", Size: 1},
+					{URI: "gs://bucket/prefix/foo/bar/v1/file2", Size: 2},
 				},
 			},
 			{
 				Timestamp: time.Date(3000, 1, 1, 0, 0, 0, 123456000, time.UTC),
 				DeletedFiles: []DatasetFile{
-					{Uri: "gs://bucket/prefix/foo/bar/v2/file1", Size: 4},
-					{Uri: "gs://bucket/prefix/foo/bar/v2/file2", Size: 8},
+					{URI: "gs://bucket/prefix/foo/bar/v2/file1", Size: 4},
+					{URI: "gs://bucket/prefix/foo/bar/v2/file2", Size: 8},
 				},
 			},
 		},
@@ -247,15 +226,15 @@ func TestClient_DeleteDatasetResponseMethods(t *testing.T) {
 			{
 				Timestamp: time.Date(2000, 1, 1, 0, 0, 0, 123456000, time.UTC),
 				DeletedFiles: []DatasetFile{
-					{Uri: "gs://bucket/prefix/foo/bar/v1/file1", Size: 1},
-					{Uri: "gs://bucket/prefix/foo/bar/v1/file2", Size: 2},
+					{URI: "gs://bucket/prefix/foo/bar/v1/file1", Size: 1},
+					{URI: "gs://bucket/prefix/foo/bar/v1/file2", Size: 2},
 				},
 			},
 			{
 				Timestamp: time.Date(3000, 1, 1, 0, 0, 0, 123456000, time.UTC),
 				DeletedFiles: []DatasetFile{
-					{Uri: "gs://bucket/prefix/foo/bar/v2/file1", Size: 4},
-					{Uri: "gs://bucket/prefix/foo/bar/v2/file2", Size: 8},
+					{URI: "gs://bucket/prefix/foo/bar/v2/file1", Size: 4},
+					{URI: "gs://bucket/prefix/foo/bar/v2/file2", Size: 8},
 				},
 			},
 		},

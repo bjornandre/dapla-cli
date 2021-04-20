@@ -1,27 +1,12 @@
-/*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
 	"fmt"
-	"github.com/statisticsnorway/dapla-cli/rest"
 	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/statisticsnorway/dapla-cli/maintenance"
 )
 
 var completionCmd = &cobra.Command{
@@ -86,24 +71,21 @@ func init() {
 // TODO: func doAutoComplete(toComplete string, client * rest.Client) ([]string, cobra.ShellCompDirective) {
 // TODO: func (client * rest.Client) DoAutoComplete(toComplete string) ([]string, cobra.ShellCompDirective) {
 func doAutoComplete(toComplete string) ([]string, cobra.ShellCompDirective) {
-	var client, err = initClient()
-	if err != nil {
-		return handleCompleteError("could not initialize client: %s", err)
-	}
+	var client = maintenance.NewClient(apiURLOf(APINameDataMaintenanceSvc), authToken())
 
 	if toComplete == "" {
 		return []string{"/"}, cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp
 	}
 
-	var res *rest.ListDatasetResponse
+	var res *maintenance.ListDatasetResponse
 
 	if toComplete == "/" {
-		res, err = client.ListDatasets(toComplete)
+		res, err := client.ListDatasets(toComplete)
 		if err != nil {
 			return handleCompleteError("could not fetch list: %s", err)
-		} else {
-			return formatCompleteResult(res)
 		}
+
+		return formatCompleteResult(res)
 	}
 
 	// Special case with missing root slash.
@@ -113,7 +95,7 @@ func doAutoComplete(toComplete string) ([]string, cobra.ShellCompDirective) {
 
 	// Ask for list without last element
 	var parentPath = toComplete[0:strings.LastIndex(toComplete, "/")]
-	res, err = client.ListDatasets(parentPath)
+	res, err := client.ListDatasets(parentPath)
 	if err != nil {
 		return handleCompleteError("could not fetch list: ", err)
 	}
@@ -126,13 +108,13 @@ func doAutoComplete(toComplete string) ([]string, cobra.ShellCompDirective) {
 			res, err = client.ListDatasets(toComplete)
 			if err != nil {
 				return handleCompleteError("could not fetch list: ", err)
-			} else {
-				return formatCompleteResult(res)
 			}
+
+			return formatCompleteResult(res)
 		}
 	}
 
-	var matches rest.ListDatasetResponse
+	var matches maintenance.ListDatasetResponse
 	for _, element := range *res {
 		// find all elements that matches the last element in the provided path
 		var lastPart = element.Path[strings.LastIndex(element.Path, "/")+1 : len(element.Path)]
@@ -144,7 +126,7 @@ func doAutoComplete(toComplete string) ([]string, cobra.ShellCompDirective) {
 }
 
 // Format and set the flags based on the given elements
-func formatCompleteResult(elements *rest.ListDatasetResponse) ([]string, cobra.ShellCompDirective) {
+func formatCompleteResult(elements *maintenance.ListDatasetResponse) ([]string, cobra.ShellCompDirective) {
 	var suggestions []string
 	var hasFolders = false
 	var flags = cobra.ShellCompDirectiveNoFileComp
@@ -171,7 +153,7 @@ func handleCompleteError(message string, err error) ([]string, cobra.ShellCompDi
 }
 
 // Normalize the result of auto completion.
-func normalizeCompleteElement(element rest.ListDatasetElement) string {
+func normalizeCompleteElement(element maintenance.ListDatasetElement) string {
 	path := element.Path
 	if strings.HasSuffix(element.Path, "/") {
 		path = strings.TrimSuffix(path, "/")
