@@ -6,7 +6,10 @@ name: release
 on:
  release:
     types: [created]
-  
+
+   # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:   
   releases-matrix:
@@ -19,8 +22,9 @@ jobs:
         goarch: ["386", amd64]
     steps:
     - uses: actions/checkout@v2
-    - uses: wangyoucao577/go-release-action@v1.14
+    - uses: wangyoucao577/go-release-action@v1.17
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
+        extra_files: LICENSE README.md CHANGELOG.md
