@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Viper configuraton keys
+// Viper configuration keys
 const (
 	CFGDebug     = "debug"
 	CFGJupyter   = "jupyter"

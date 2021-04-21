@@ -60,7 +60,7 @@ func (c *Client) Export(req Request) (*Response, error) {
 	}
 
 	if resp.StatusCode() >= 400 {
-		err = errors.New(resp.Status())
+		return nil, errors.New(resp.Status())
 	}
 
 	return resp.Result().(*Response), nil
