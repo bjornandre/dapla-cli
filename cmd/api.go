@@ -13,8 +13,7 @@ const (
 )
 
 func apiURLOf(apiName string) string {
-
-	if apiURL := viper.GetStringMapString(CFGAPIs)[apiName]; apiURL != "" {
+	if apiURL := viper.GetString("apis." + apiName); apiURL != "" {
 		return apiURL
 	}
 
