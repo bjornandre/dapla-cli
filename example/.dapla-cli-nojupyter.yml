@@ -1,0 +1,7 @@
+jupyter: false
+authtoken: eyJh...TqV2Q
+apis:
+  #data-maintenance: $DATA_MAINTENANCE_URL
+  data-maintenance: http://localhost:10200
+  #dapla-pseudo-service: $PSEUDO_SERVICE_URL
+  dapla-pseudo-service: http://localhost:30950
