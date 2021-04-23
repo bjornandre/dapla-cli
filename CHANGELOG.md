@@ -2,11 +2,7 @@
 
 ## [0.0.7](https://github.com/statisticsnorway/dapla-cli/tree/0.0.7) (2021-04-21)
 
-[Full Changelog](https://github.com/statisticsnorway/dapla-cli/compare/0.0.6...0.0.7)
-
-## [0.0.6](https://github.com/statisticsnorway/dapla-cli/tree/0.0.6) (2021-04-21)
-
-[Full Changelog](https://github.com/statisticsnorway/dapla-cli/compare/0.0.5...0.0.6)
+[Full Changelog](https://github.com/statisticsnorway/dapla-cli/compare/0.0.5...0.0.7)
 
 ## [0.0.5](https://github.com/statisticsnorway/dapla-cli/tree/0.0.5) (2021-04-21)
 
