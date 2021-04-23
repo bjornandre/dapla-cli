@@ -33,6 +33,7 @@ Flags:
 Use "dapla [command] --help" for more information about a command.
 ```
 
+
 ## Installation
 
 **NOTE**: The command is already installed in the Dapla JupyterLab environement.
@@ -53,48 +54,6 @@ eval $(make alias-XXX)
 
 Option 3 and 4 requires that you have a Go development environment.
 
-## Configuration
-
-Although most config can be provided directly to the CLI, an alternative configuration source is the `.dapla-cli.yml`
-config file. dapla-cli will look for config in the following location by default: `$HOME/.dapla-cli.yml`. The location
-is configurable by specifying the `--config` flag. The following is an example of a configuration file:
-
-```yml
-jupyter: false
-authtoken: eyJh...TqV2Q
-apis:
-  data-maintenance: $DATA_MAINTENANCE_URL # Will be substituted by the value of $DATA_MAINTENANCE_URL during runtime
-  dapla-pseudo-service: http://localhost:30950
-```
-
-You can also populate config options via environment variables. E.g. if the `$AUTHTOKEN` env variable is configured then
-this will take precedence over the configuration file. For API URLs you can either specify a URL directly in config, or
-as an environment variable that will be resolved during runtime.
-
-Have a look at the [examples](/examples) folder for more config file examples.
-
-## Authentication
-
-In order to be able to communicate with the API servers you need to provide an authentication methods and the API server URI. 
-
-The flags `--jupyter` can be used when the dapla command runs inside the container. In this case the application will try to retrieve the authentication token by itself: 
-
-`# dapla --jupyter`
-
-Alternatively one can provide an authentication token manually using the `--authtoken` flag, like so:
-
-`# dapla --authtoken "my.jwt.token"`
-
-... or by specifying the token in the `.dapla-cli.yml` file. Also, a third option is to specify the `$AUTHTOKEN` env variable.
-
-## API URLs
-
-You will need to configure the locations of the APIs that Dapla CLI communicates with. It is recommended
-that you provide this configuration in the `.dapla-cli.yml` file (see example above).
-
-It is also possible to provide the API urls directly to the Dapla CLI, like so:
-
-`# dapla --jupyter --apis data-maintenance="http://data-mainenance-server",dapla-pseudo-service="http://dapla-pseudo-service-server"`
 
 ## Commands
 
@@ -161,6 +120,52 @@ Flags:
 ### completion
 
 The completion command can be used to setup autocompletion. Refer to the [cobra documentation](https://github.com/spf13/cobra/blob/master/shell_completions.md) for more details.
+
+
+## Configuration
+
+Although most config can be provided directly to the CLI, an alternative configuration source is the `.dapla-cli.yml`
+config file. dapla-cli will look for config in the following location by default: `$HOME/.dapla-cli.yml`. The location
+is configurable by specifying the `--config` flag. The following is an example of a configuration file:
+
+```yml
+jupyter: false
+authtoken: eyJh...TqV2Q
+apis:
+  data-maintenance: $DATA_MAINTENANCE_URL # Will be substituted by env variable during runtime
+  dapla-pseudo-service: http://localhost:30950
+```
+
+You can also populate config options via environment variables. E.g. if the `$AUTHTOKEN` env variable is configured then
+this will take precedence over the configuration file.
+
+Have a look at the [examples](/examples) folder for more config file examples.
+
+### API URLs
+
+You will need to configure the locations of the APIs that Dapla CLI communicates with. It is recommended
+that you provide this configuration in the `.dapla-cli.yml` file (see example above). For API URLs you can either
+specify a URL directly in config, or as an environment variable that will be resolved during runtime.
+
+It is also possible to provide the API urls directly to the Dapla CLI, like so:
+
+`# dapla --jupyter --apis data-maintenance="http://data-mainenance-server",dapla-pseudo-service="http://dapla-pseudo-service-server"`
+
+
+## Authentication
+
+In order to be able to communicate with the API servers you need to provide an authentication methods and the API server URI. 
+
+The flags `--jupyter` can be used when the dapla command runs inside the container. In this case the application will try to retrieve the authentication token by itself: 
+
+`# dapla --jupyter`
+
+Alternatively one can provide an authentication token manually using the `--authtoken` flag, like so:
+
+`# dapla --authtoken "my.jwt.token"`
+
+... or by specifying the token in the `.dapla-cli.yml` file. Also, a third option is to specify the `$AUTHTOKEN` env variable.
+
 
 ## Development
 
