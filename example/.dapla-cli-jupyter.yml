@@ -1,5 +1,4 @@
-jupyter: false
-authtoken: eyJh...TqV2Q
+jupyter: true
 apis:
   data-maintenance: $DATA_MAINTENANCE_URL
   dapla-pseudo-service: $PSEUDO_SERVICE_URL
