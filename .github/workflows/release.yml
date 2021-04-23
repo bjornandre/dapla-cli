@@ -23,8 +23,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Set BUILD_TIME env
+      run: echo ::set-env name=BUILD_TIME::$(date -u +%Y-%m-%dT%H:%M:%S%Z)
+
     - uses: wangyoucao577/go-release-action@v1.17
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
+        build_flags: -v
+        ldflags: -X "github.com/statisticsnorway/dapla-cli/cmd/Version=${{ github.event.release.tag_name }}" -X "github.com/statisticsnorway/dapla-cli/cmd.GitSha1Hash=${{ github.sha }}" -X "github.com/statisticsnorway/dapla-cli/cmd/BuildTime=${{ env.BUILD_TIME }}"
