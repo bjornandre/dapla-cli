@@ -1,6 +1,6 @@
-# dapla-cli 
+# dapla-cli
 
-The dapla cli is a command-line application users can use to interract with the da(ta)pla(form). The command 
+The Dapla CLI is a command-line application users can use to interract with the da(ta)pla(form). The command 
 has several sub-commands.
 
 [![CI](https://github.com/statisticsnorway/dapla-cli/actions/workflows/main.yml/badge.svg)](https://github.com/statisticsnorway/dapla-cli/actions/workflows/main.yml)
@@ -8,14 +8,14 @@ has several sub-commands.
 [![Go Report Card](https://goreportcard.com/badge/github.com/statisticsnorway/dapla-cli?style=flat-square)](https://goreportcard.com/report/github.com/statisticsnorway/dapla-cli)
 
 ```
-# dapla --help
-The dapla command is a collection of utilities you can use with the dapla platform.
+The dapla command is a collection of utilities you can use with the Dapla platform.
 
 Usage:
   dapla [command]
 
 Available Commands:
   completion  Generate completion script
+  doctor      Print diagnostics and check the system for potential problems
   export      Export a dataset
   help        Help about any command
   ls          List the datasets and folders under a PATH
@@ -28,30 +28,50 @@ Flags:
   -d, --debug                 print debug information
   -h, --help                  help for dapla
       --jupyter               set this flag to fetch user auth token from jupyter
+  -v, --version               version for dapla
 
 Use "dapla [command] --help" for more information about a command.
 ```
 
 ## Installation
 
-**NOTE**: The command is already installed in the dapla jupyterlab environement.
+**NOTE**: The command is already installed in the Dapla JupyterLab environement.
 
-To install the command locally [download](https://github.com/statisticsnorway/dapla-cli/releases) the latest release archive and extract its content on your computer.
-Alias the `dapla-cli` executable to `dapla`.
+### Running locally
 
-## .dapla-cli.yml config file
+There are primarily four ways to run the Dapla CLI locally:
 
-Although most config can be provided directly to the cli, an alternative configuration source is the `.dapla-cli.yml`
-config file. By default the dapla-cli will look for config in the following location: `$HOME/.dapla-cli.yml`. This is also
-configurable by specifying the `--config` flag. The following is an example of a `.dapla-cli.yml`:
+1. From [published binary](https://github.com/statisticsnorway/dapla-cli/releases). Extract and alias the `dapla-cli` executable to `dapla`.
+2. Via Docker
+3. Run in dev mode - without a build
+4. From locally built binary
+
+The `Makefile` provides some useful aliases for the latter options, which you can apply to you local environment like so:
+```sh
+eval $(make alias-XXX)
+```
+
+Option 3 and 4 requires that you have a Go development environment.
+
+## Configuration
+
+Although most config can be provided directly to the CLI, an alternative configuration source is the `.dapla-cli.yml`
+config file. dapla-cli will look for config in the following location by default: `$HOME/.dapla-cli.yml`. The location
+is configurable by specifying the `--config` flag. The following is an example of a configuration file:
 
 ```yml
 jupyter: false
 authtoken: eyJh...TqV2Q
 apis:
-  data-maintenance: http://localhost:10200
+  data-maintenance: $DATA_MAINTENANCE_URL # Will be substituted by the value of $DATA_MAINTENANCE_URL during runtime
   dapla-pseudo-service: http://localhost:30950
 ```
+
+You can also populate config options via environment variables. E.g. if the `$AUTHTOKEN` env variable is configured then
+this will take precedence over the configuration file. For API URLs you can either specify a URL directly in config, or
+as an environment variable that will be resolved during runtime.
+
+Have a look at the [examples](/examples) folder for more config file examples.
 
 ## Authentication
 
@@ -69,10 +89,10 @@ Alternatively one can provide an authentication token manually using the `--auth
 
 ## API URLs
 
-You will need to configure the locations of the APIs that the dapla-cli communicates with. It is recommended
+You will need to configure the locations of the APIs that Dapla CLI communicates with. It is recommended
 that you provide this configuration in the `.dapla-cli.yml` file (see example above).
 
-It is also possible to provide the API urls directly to the dapla-cli, like so:
+It is also possible to provide the API urls directly to the Dapla CLI, like so:
 
 `# dapla --jupyter --apis data-maintenance="http://data-mainenance-server",dapla-pseudo-service="http://dapla-pseudo-service-server"`
 
@@ -141,3 +161,20 @@ Flags:
 ### completion
 
 The completion command can be used to setup autocompletion. Refer to the [cobra documentation](https://github.com/spf13/cobra/blob/master/shell_completions.md) for more details.
+
+## Development
+
+Refer to the `Makefile` for misc development related tasks
+```
+build-local                    Build dapla-cli
+build-docker                   Build dapla-cli with docker
+changelog                      Generate CHANGELOG.md
+alias-dev                      Print dapla alias for local development (no build) - apply with eval $(make alias-dev)
+alias-localbuild               Print dapla alias for local build - apply with eval $(make alias-localbuild)
+alias-docker                   Print dapla alias for running dapla-cli within docker - apply with eval $(make alias-docker)
+```
+
+### Releasing a new version
+
+Releasing a new version is currently handled by [creating a release via github](https://github.com/statisticsnorway/dapla-cli/releases/new).
+This will in turn trigger the Github Workflow that builds the binaries.
