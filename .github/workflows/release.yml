@@ -27,10 +27,13 @@ jobs:
     - name: Set NOW env
       run: echo "NOW=$(date -u +%Y-%m-%dT%H:%M:%S%Z)" >> $GITHUB_ENV
 
+    - name: Print env
+      run: echo "1) ${{ env.NOW }} /2) ${{ env.RELEASE_TAG }} /2) ${{ github.ref }} /3) ${{ github.event.release }} /4) ${{ date -u +%Y-%m-%dT%H:%M:%S%Z }} /5) ${{ echo $GITHUB_REF | rev | cut -d'/' -f 1 | rev }}"
+
     - uses: wangyoucao577/go-release-action@v1.17
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         build_flags: -v
-        ldflags: -X "github.com/statisticsnorway/dapla-cli/cmd/Version=${{ github.event.release.tag_name }}" -X "github.com/statisticsnorway/dapla-cli/cmd.GitSha1Hash=${{ github.sha }}" -X "github.com/statisticsnorway/dapla-cli/cmd/BuildTime=${{ env.NOW }}"
+        ldflags: -X "github.com/statisticsnorway/dapla-cli/cmd/Version=$RELEASE_TAG" -X "github.com/statisticsnorway/dapla-cli/cmd.GitSha1Hash=${{ github.sha }}" -X "github.com/statisticsnorway/dapla-cli/cmd/BuildTime=${{ env.NOW }}"
