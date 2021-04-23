@@ -121,6 +121,12 @@ Flags:
 
 The completion command can be used to setup autocompletion. Refer to the [cobra documentation](https://github.com/spf13/cobra/blob/master/shell_completions.md) for more details.
 
+### doctor
+
+The doctor command checks the system for potential problems and prints environmental stuff useful for debugging purposes.
+Exits with a non-zero status if any potential problems are found. This command is only used for Dapla developers to help
+pinpoint problems with the Dapla CLI and the evironment in which it is installed.
+
 
 ## Configuration
 
