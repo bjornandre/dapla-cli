@@ -2,19 +2,19 @@
 
 name: release
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
- release:
+  release:
     types: [created]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:   
+jobs:
   releases-matrix:
     name: Release Go Binary
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # build and publish in parallel: linux/386, linux/amd64, windows/386, windows/amd64, darwin/386, darwin/amd64 
+        # build and publish in parallel: linux/386, linux/amd64, windows/386, windows/amd64, darwin/386, darwin/amd64
         goos: [linux, windows, darwin]
         goarch: ["386", amd64]
         exclude:
@@ -22,18 +22,18 @@ jobs:
             goarch: "386"
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set NOW env
-      run: echo "NOW=$(date -u +%Y-%m-%dT%H:%M:%S%Z)" >> $GITHUB_ENV
+      - name: Set NOW env
+        run: echo "NOW=$(date -u +%Y-%m-%dT%H:%M:%S%Z)" >> $GITHUB_ENV
 
-    - name: Print env
-      run: echo "1) ${{ env.NOW }} /2) ${{ env.RELEASE_TAG }} /2) ${{ github.ref }} /3) ${{ github.event.release }} /4) ${{ date -u +%Y-%m-%dT%H:%M:%S%Z }} /5) ${{ echo $GITHUB_REF | rev | cut -d'/' -f 1 | rev }}"
+      - name: Set APP_VERSION env
+        run: echo APP_VERSION=$( echo ${GITHUB_REF} | rev | cut -d'/' -f 1 | rev ) >> $GITHUB_ENV
 
-    - uses: wangyoucao577/go-release-action@v1.17
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-        build_flags: -v
-        ldflags: -X "github.com/statisticsnorway/dapla-cli/cmd/Version=$RELEASE_TAG" -X "github.com/statisticsnorway/dapla-cli/cmd.GitSha1Hash=${{ github.sha }}" -X "github.com/statisticsnorway/dapla-cli/cmd/BuildTime=${{ env.NOW }}"
+      - uses: wangyoucao577/go-release-action@v1.17
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          build_flags: -v
+          ldflags: -X github.com/statisticsnorway/dapla-cli/cmd.Version=${{ env.APP_VERSION }} -X github.com/statisticsnorway/dapla-cli/cmd.GitSha1Hash=${{ github.sha }} -X github.com/statisticsnorway/dapla-cli/cmd.BuildTime=${{ env.NOW }}
