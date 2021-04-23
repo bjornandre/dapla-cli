@@ -16,7 +16,7 @@ var (
 
 func newExportCommand() *cobra.Command {
 	return &cobra.Command{
-		Use:   "export [PATH]...",
+		Use:   "export [PATH]",
 		Short: "Export a dataset",
 		Long:  `The export command exports (and optionally depseudonymizes) a specified dataset`,
 		Args:  cobra.MinimumNArgs(1),

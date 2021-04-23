@@ -1,8 +1,12 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
 
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
@@ -13,10 +17,41 @@ const (
 )
 
 func apiURLOf(apiName string) string {
-	if apiURL := viper.GetString("apis." + apiName); apiURL != "" {
-		return apiURL
+	var apiURL, err = apiURLOrError(apiName)
+	cobra.CheckErr(err)
+	return apiURL
+}
+
+func apiURLOrError(apiName string) (string, error) {
+	apiURLs := viper.GetStringMapString("apis")
+	if apiURLs == nil {
+		return "", fmt.Errorf("unable to determine API URLs from config")
 	}
 
-	// TODO: Don't panic
-	panic(fmt.Errorf("missing api base url for %s (specify in config file or via --apis flag)", apiName))
+	apiURL := apiURLs[apiName]
+	if apiURL == "" {
+		return "", fmt.Errorf("unable to determine API URL for %v", apiName)
+	}
+
+	if strings.HasPrefix(apiURL, "$") {
+		if resolvedURL := os.Getenv(apiURL[1:]); resolvedURL != "" {
+			return resolvedURL, nil
+		}
+
+		return "", fmt.Errorf("unable to resolve %v API URL for environment variable %v", apiName, apiURL)
+	}
+
+	return apiURL, nil
+}
+
+func allAPIUrls() map[string]string {
+	return map[string]string{
+		APINameDataMaintenanceSvc: apiURLOf(APINameDataMaintenanceSvc),
+		APINamePseudoSvc:          apiURLOf(APINamePseudoSvc),
+	}
+}
+
+func allAPIUrlsString() string {
+	apis, _ := json.MarshalIndent(allAPIUrls(), "", "\t")
+	return string(apis)
 }
