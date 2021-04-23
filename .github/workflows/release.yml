@@ -24,8 +24,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set BUILD_TIME env
-      run: echo ::set-env name=BUILD_TIME::$(date -u +%Y-%m-%dT%H:%M:%S%Z)
+    - name: Set NOW env
+      run: echo "NOW=$(date -u +%Y-%m-%dT%H:%M:%S%Z)" >> $GITHUB_ENV
 
     - uses: wangyoucao577/go-release-action@v1.17
       with:
@@ -33,4 +33,4 @@ jobs:
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         build_flags: -v
-        ldflags: -X "github.com/statisticsnorway/dapla-cli/cmd/Version=${{ github.event.release.tag_name }}" -X "github.com/statisticsnorway/dapla-cli/cmd.GitSha1Hash=${{ github.sha }}" -X "github.com/statisticsnorway/dapla-cli/cmd/BuildTime=${{ env.BUILD_TIME }}"
+        ldflags: -X "github.com/statisticsnorway/dapla-cli/cmd/Version=${{ github.event.release.tag_name }}" -X "github.com/statisticsnorway/dapla-cli/cmd.GitSha1Hash=${{ github.sha }}" -X "github.com/statisticsnorway/dapla-cli/cmd/BuildTime=${{ env.NOW }}"
