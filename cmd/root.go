@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/briandowns/spinner"
@@ -22,16 +23,29 @@ const (
 
 var cfgFile string
 var rootCmd = &cobra.Command{
-	Use:   "dapla",
-	Short: "dapla command line utility",
-	Long: `The dapla command is a collection of utilities you can use with the dapla
-				platform.`,
+	Use:     "dapla",
+	Version: versionInfo(),
+	Short:   "dapla command line utility",
+	Long:    `The dapla command is a collection of utilities you can use with the dapla platform.`,
 }
 
 // Execute uses the command line args  and run through the command tree finding appropriate matches
 // for commands and then corresponding flags.
 func Execute() error {
 	return rootCmd.Execute()
+}
+
+func versionInfo() string {
+	info := fmt.Sprintf("%v", Version)
+	if GitSha1Hash != "" {
+		info += fmt.Sprintf("\n  Rev ID:     %v", GitSha1Hash)
+	}
+	if BuildTime != "" {
+		info += fmt.Sprintf("\n  Built:      %v", BuildTime)
+	}
+	info += fmt.Sprintf("\n  Go version: %v", runtime.Version())
+	info += fmt.Sprintf("\n  OS/Arch:    %v/%v", runtime.GOOS, runtime.GOARCH)
+	return info
 }
 
 func init() {
@@ -80,12 +94,11 @@ func initConfig() {
 			panic(fmt.Errorf("configuration error: %s", err))
 		}
 	}
+}
 
-	// Print a configuration summary if debug is enabled
-	if viper.GetBool(CFGDebug) {
-		cfg, _ := json.MarshalIndent(viper.AllSettings(), "", "\t")
-		fmt.Println("dapla-cli config:\n", string(cfg))
-	}
+func effectiveConfig() string {
+	cfg, _ := json.MarshalIndent(viper.AllSettings(), "", "\t")
+	return string(cfg)
 }
 
 // newSpinner func creates and starts a new CLI spinner
