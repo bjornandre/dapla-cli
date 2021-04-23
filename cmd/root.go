@@ -38,7 +38,7 @@ func Execute() error {
 func versionInfo() string {
 	info := fmt.Sprintf("%v", Version)
 	if GitSha1Hash != "" {
-		info += fmt.Sprintf("\n  Rev ID:     %v", GitSha1Hash)
+		info += fmt.Sprintf("\n  Rev:        %v", GitSha1Hash)
 	}
 	if BuildTime != "" {
 		info += fmt.Sprintf("\n  Built:      %v", BuildTime)
