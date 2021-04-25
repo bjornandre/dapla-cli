@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/statisticsnorway/dapla-cli/tree/HEAD)
+
+[Full Changelog](https://github.com/statisticsnorway/dapla-cli/compare/0.0.8...HEAD)
+
+**Closed issues:**
+
+- Create automatic release on github [\#7](https://github.com/statisticsnorway/dapla-cli/issues/7)
+
+## [0.0.8](https://github.com/statisticsnorway/dapla-cli/tree/0.0.8) (2021-04-23)
+
+[Full Changelog](https://github.com/statisticsnorway/dapla-cli/compare/0.0.7...0.0.8)
+
 ## [0.0.7](https://github.com/statisticsnorway/dapla-cli/tree/0.0.7) (2021-04-21)
 
 [Full Changelog](https://github.com/statisticsnorway/dapla-cli/compare/0.0.5...0.0.7)
