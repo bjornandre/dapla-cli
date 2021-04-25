@@ -26,7 +26,6 @@ func TestClient_Export(t *testing.T) {
 
 	var req = Request{
 		DatasetPath:       "/path/to/dataset",
-		TargetPath:        "/path/to/target",
 		TargetContentName: "testexport",
 		TargetPassword:    "kensentme",
 		Depseudonymize:    true,

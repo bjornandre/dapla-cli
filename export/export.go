@@ -16,14 +16,13 @@ type PseudoRule struct {
 
 // Request holds parameters used to invoke the dapla-pseudo-service export endpoint
 type Request struct {
-	DatasetPath       string       `json:"datasetPath"`
-	DatasetTimestamp  int64        `json:"datasetTimestamp"`
-	ColumnSelectors   []string     `json:"columnSelectors"`
-	TargetPath        string       `json:"targetPath"`
-	TargetContentName string       `json:"targetContentName"`
-	TargetPassword    string       `json:"targetPassword"`
-	Depseudonymize    bool         `json:"depseudonymize"`
-	PseudoRules       []PseudoRule `json:"pseudoRules"`
+	DatasetPath            string       `json:"datasetPath"`
+	ColumnSelectors        []string     `json:"columnSelectors"`
+	TargetContentName      string       `json:"targetContentName"`
+	TargetPassword         string       `json:"targetPassword"`
+	Depseudonymize         bool         `json:"depseudonymize"`
+	PseudoRules            []PseudoRule `json:"pseudoRules"`
+	PseudoRulesDatasetPath string       `json:"pseudoRulesDatasetPath"`
 }
 
 // Response holds results after exporting a dataset

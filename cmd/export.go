@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -49,13 +48,14 @@ func newExportCommand() *cobra.Command {
 
 func init() {
 	exportCommand := newExportCommand()
-	exportCommand.Flags().Int64VarP(&req.DatasetTimestamp, "timestamp", "t", time.Now().UnixNano()/int64(time.Millisecond), "optional timestamp of dataset, resolved against the closest matching version")
-	exportCommand.Flags().StringVar(&req.TargetPath, "target-path", "", "path to where the exported dataset archive will be stored")
-	exportCommand.Flags().StringVarP(&req.TargetContentName, "name", "n", "", "descriptive name of the contents, used as baseline for the target archive name")
+	exportCommand.Flags().StringVarP(&req.TargetContentName, "name", "n", "", "optional descriptive name of the contents, used as baseline for the target archive name")
 	exportCommand.Flags().StringVarP(&req.TargetPassword, "password", "p", "", "password used to protect target archive")
 	exportCommand.MarkFlagRequired("password")
 	exportCommand.Flags().BoolVar(&req.Depseudonymize, "depseudo", false, "depseudonymize data during export")
-	exportCommand.Flags().StringToStringVar(&pseudoRuleMap, "pseudo-rules", map[string]string{}, "password used to protect target archive")
+	exportCommand.Flags().StringToStringVar(&pseudoRuleMap, "pseudo-rules", map[string]string{}, "explicit pseudo rules to use")
+	exportCommand.Flags().StringVar(&req.PseudoRulesDatasetPath, "pseudo-rules-path", "", "path to retrieve pseudo rules from")
+
+	// TODO: Add validation rule that fails if both pseudo-rules and pseudo-rules-path flags are specified
 
 	rootCmd.AddCommand(exportCommand)
 }
