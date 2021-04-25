@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/statisticsnorway/dapla-cli/tree/HEAD)
 
-[Full Changelog](https://github.com/statisticsnorway/dapla-cli/compare/0.0.8...HEAD)
+[Full Changelog](https://github.com/statisticsnorway/dapla-cli/compare/0.0.9...HEAD)
+
+**Closed issues:**
+
+- Export should address timestamped dataset paths using "short format" [\#13](https://github.com/statisticsnorway/dapla-cli/issues/13)
+
+## [0.0.9](https://github.com/statisticsnorway/dapla-cli/tree/0.0.9) (2021-04-25)
+
+[Full Changelog](https://github.com/statisticsnorway/dapla-cli/compare/0.0.8...0.0.9)
 
 **Closed issues:**
 
