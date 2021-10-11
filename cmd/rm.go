@@ -109,8 +109,7 @@ func deleteWithPrompt(path string, dryRun bool) {
 	}
 
 	switch char {
-	case 'Y':
-	case 'y':
+	case 'y', 'Y':
 		doDelete(path, dryRun)
 		break
 	default:
