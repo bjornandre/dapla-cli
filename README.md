@@ -91,9 +91,13 @@ Usage:
   dapla rm [PATH]... [flags]
 
 Flags:
-      --dry-run   dry run
-  -h, --help      help for rm
+      --dry-run     dry run
+  -h, --help        help for rm
+      --recursive   delete recursively
 ```
+
+The `--recursive` flag will search recursively at the given `PATH` for all datasets and prompt the user to delete it with a `y` (yes) or `n` (no) option.
+Both the `--recursive` and `--dry-run` flags can be combined.
 
 ### export
 
