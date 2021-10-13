@@ -60,7 +60,7 @@ func doDelete(path string, output io.Writer, dryRun bool) {
 			exitCode = 0
 		default:
 		}
-		fmt.Fprintln(output, err.Error()+"\n")
+		fmt.Fprintln(os.Stderr, err.Error()+"\n")
 		os.Exit(exitCode)
 	} else {
 		printDeleteResponse(res, output, dryRun)
@@ -77,7 +77,7 @@ func deleteRecursively(path string, output io.Writer, input io.Reader, dryRun bo
 			exitCode = 0
 		default:
 		}
-		fmt.Fprintln(output, err.Error()+"\n")
+		fmt.Fprintln(os.Stderr, err.Error()+"\n")
 		os.Exit(exitCode)
 	} else if res != nil && len(*res) > 0 {
 		printBeforeDelete(res, output, input, dryRun)
@@ -104,7 +104,7 @@ func deleteWithPrompt(path string, output io.Writer, input io.Reader, dryRun boo
 	char, _, err := reader.ReadRune()
 
 	if err != nil {
-		fmt.Fprint(output, err)
+		fmt.Fprint(os.Stderr, err)
 	}
 
 	switch char {

@@ -175,22 +175,32 @@ func TestDeleteRecursively(t *testing.T) {
 	defer gock.Off()
 
 	gock.New("http://data-maintenance-mock/(.*)").
-		PathParam("list", "foo").
+		Path("list/foo").
 		MatchHeader("Authorization", "Bearer eyJh...TqV2Q").
 		Reply(http.StatusOK).
 		BodyString(`[{
-			"path": "foo",
+			"path": "foo/bar",
+			"createdDate": "2012-04-23T18:25:43.511Z",
+			"depth": 1
+		}]`)
+
+	gock.New("http://data-maintenance-mock/(.*)").
+		Path("list/foo/bar").
+		MatchHeader("Authorization", "Bearer eyJh...TqV2Q").
+		Reply(http.StatusOK).
+		BodyString(`[{
+			"path": "foo/bar/baz",
 			"createdDate": "2012-04-23T18:25:43.511Z",
 			"depth": 0
 		}]`)
 
 	gock.New("http://data-maintenance-mock/(.*)").
-		PathParam("delete", "foo").
+		Path("delete/foo/bar/baz").
 		MatchParam("dry-run", "false").
 		MatchHeader("Authorization", "Bearer eyJh...TqV2Q").
 		Reply(http.StatusOK).
 		BodyString(`{
-			"datasetPath": "foo",
+			"datasetPath": "foo/bar/baz",
 			"deletedVersions": [{
 				"timestamp": "2012-04-23T18:25:43.511Z"
 			}],
@@ -210,7 +220,39 @@ func TestDeleteRecursively(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 	t.Logf(output)
-	assert.Equal(t, "Delete dataset foo? Dataset foo (1 version) successfully deleted\n\r", output)
+	assert.Equal(t, "Delete dataset foo/bar/baz? Dataset foo/bar/baz (1 version) successfully deleted\n\r", output)
+	assert.True(t, gock.IsDone())
+	gock.Clean()
+}
+
+func TestDeleteRecursivelyAnswerNo(t *testing.T) {
+	readTestConfig()
+	defer gock.Off()
+
+	gock.New("http://data-maintenance-mock/(.*)").
+		Path("list/foo").
+		MatchHeader("Authorization", "Bearer eyJh...TqV2Q").
+		Reply(http.StatusOK).
+		BodyString(`[{
+			"path": "foo/bar",
+			"createdDate": "2012-04-23T18:25:43.511Z",
+			"depth": 0
+		}]`)
+
+	command := newRmCommand()
+	command.Flags().BoolVarP(&rmRecursive, "recursive", "", false, "delete recursively")
+
+	var stdin bytes.Buffer
+	// Simulate that the user enters 'n' from stdin
+	stdin.Write([]byte("n"))
+	command.SetIn(&stdin)
+	output, err := executeCommand(command, "--recursive", "foo")
+
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	t.Logf(output)
+	assert.Equal(t, "Delete dataset foo/bar? ... skipped\n", output)
 	assert.True(t, gock.IsDone())
 	gock.Clean()
 }
