@@ -33,9 +33,9 @@ func newRmCommand() *cobra.Command {
 
 			path := args[0]
 			if rmRecursive {
-				deleteRecursively(path, rmDryRun)
+				deleteRecursively(path, cmd.OutOrStdout(), cmd.InOrStdin(), rmDryRun)
 			} else {
-				doDelete(path, rmDryRun)
+				doDelete(path, cmd.OutOrStdout(), rmDryRun)
 			}
 		},
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -46,7 +46,7 @@ func newRmCommand() *cobra.Command {
 	}
 }
 
-func doDelete(path string, dryRun bool) {
+func doDelete(path string, output io.Writer, dryRun bool) {
 	// Create and start spinner
 	spinner := newSpinner("Deleting dataset " + path)
 	var client = maintenance.NewClient(apiURLOf(APINameDataMaintenanceSvc), authToken())
@@ -60,14 +60,14 @@ func doDelete(path string, dryRun bool) {
 			exitCode = 0
 		default:
 		}
-		fmt.Println(err.Error() + "\n")
+		fmt.Fprintln(output, err.Error()+"\n")
 		os.Exit(exitCode)
 	} else {
-		printDeleteResponse(res, os.Stdout, dryRun)
+		printDeleteResponse(res, output, dryRun)
 	}
 }
 
-func deleteRecursively(path string, dryRun bool) {
+func deleteRecursively(path string, output io.Writer, input io.Reader, dryRun bool) {
 	var client = maintenance.NewClient(apiURLOf(APINameDataMaintenanceSvc), authToken())
 	res, err := client.ListDatasets(path)
 	if err != nil {
@@ -77,43 +77,42 @@ func deleteRecursively(path string, dryRun bool) {
 			exitCode = 0
 		default:
 		}
-		fmt.Println(err.Error() + "\n")
+		fmt.Fprintln(output, err.Error()+"\n")
 		os.Exit(exitCode)
-	} else if res != nil {
-		printBeforeDelete(res, dryRun)
+	} else if res != nil && len(*res) > 0 {
+		printBeforeDelete(res, output, input, dryRun)
 	} else {
 		// no error and response is nil
-		writer := bufio.NewWriter(os.Stdout)
-		fmt.Fprintf(writer, "Could not find any datasets to delete.\n\r")
+		fmt.Fprintf(output, "Could not find any datasets to delete.\n\r")
 	}
 
 }
 
-func printBeforeDelete(datasetsAndFolders *maintenance.ListDatasetResponse, dryRun bool) {
+func printBeforeDelete(datasetsAndFolders *maintenance.ListDatasetResponse, output io.Writer, input io.Reader, dryRun bool) {
 	for _, item := range *datasetsAndFolders {
 		if item.IsDataset() {
-			deleteWithPrompt(item.Path, dryRun)
+			deleteWithPrompt(item.Path, output, input, dryRun)
 		} else {
-			deleteRecursively(item.Path, dryRun)
+			deleteRecursively(item.Path, output, input, dryRun)
 		}
 	}
 }
 
-func deleteWithPrompt(path string, dryRun bool) {
-	fmt.Print("Delete dataset ", path, "? ")
-	reader := bufio.NewReader(os.Stdin)
+func deleteWithPrompt(path string, output io.Writer, input io.Reader, dryRun bool) {
+	fmt.Fprint(output, "Delete dataset ", path, "? ")
+	reader := bufio.NewReader(input)
 	char, _, err := reader.ReadRune()
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprint(output, err)
 	}
 
 	switch char {
 	case 'y', 'Y':
-		doDelete(path, dryRun)
+		doDelete(path, output, dryRun)
 		break
 	default:
-		fmt.Println("... skipped")
+		fmt.Fprintln(output, "... skipped")
 	}
 }
 

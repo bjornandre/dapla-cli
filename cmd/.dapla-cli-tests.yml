@@ -1,0 +1,5 @@
+jupyter: false
+authtoken: eyJh...TqV2Q
+apis:
+  data-maintenance: http://data-maintenance-mock
+  dapla-pseudo-service: http://dapla-pseudo-service-mock
